@@ -2,19 +2,18 @@
 
 declare(strict_types=1);
 
-namespace Medas\Placeholder;
+namespace Medas\ObjectInstantiatorTest\MockUps;
 
 use Medas\Core\AsSingleton;
 use Medas\ServiceManager\BasePackage;
 
-class PlaceholderPackage extends BasePackage
+class MockUpPackage extends BasePackage
 {
     use AsSingleton;
 
     public function dependencies(): array
     {
-        return $this->dependenciesByClass([
-        ]);
+        return [];
     }
 
     public function sourceDirectory(): string

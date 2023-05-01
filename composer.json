@@ -1,6 +1,6 @@
 {
-    "name": "morphp/medas-placeholder",
-    "description": "Medas placeholder",
+    "name": "morphp/medas-object-instantiator",
+    "description": "Medas object instantiator",
     "authors": [
         {
             "name": "Patrick Morpey",
@@ -11,15 +11,15 @@
     "minimum-stability": "dev",
     "prefer-stable": true,
     "require": {
-        "morphp/medas-service-manager": "dev-dev"
     },
     "require-dev": {
+        "morphp/medas-service-manager": "dev-dev",
         "phpunit/phpunit": "^9.5"
     },
     "autoload": {
         "psr-4": {
-            "Medas\\Placeholder\\": "src/",
-            "Medas\\PlaceholderTest\\": "tests/"
+            "Medas\\ObjectInstantiator\\": "src/",
+            "Medas\\ObjectInstantiatorTest\\": "tests/"
         }
     }
 }
