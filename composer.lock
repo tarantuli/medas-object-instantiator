@@ -174,17 +174,18 @@
             "source": {
                 "type": "git",
                 "url": "git@github.com:tarantuli/medas-service-manager.git",
-                "reference": "fc9b918468c575c63321f9afb2c63f77688f00e6"
+                "reference": "693ab829040adcb8421cb7a8ec6ed5285f298c9c"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/tarantuli/medas-service-manager/zipball/fc9b918468c575c63321f9afb2c63f77688f00e6",
-                "reference": "fc9b918468c575c63321f9afb2c63f77688f00e6",
+                "url": "https://api.github.com/repos/tarantuli/medas-service-manager/zipball/693ab829040adcb8421cb7a8ec6ed5285f298c9c",
+                "reference": "693ab829040adcb8421cb7a8ec6ed5285f298c9c",
                 "shasum": ""
             },
             "require": {
                 "morphp/medas-console": "dev-dev",
-                "morphp/medas-core": "dev-dev"
+                "morphp/medas-core": "dev-dev",
+                "morphp/medas-object-instantiator": "dev-dev"
             },
             "require-dev": {
                 "phpunit/phpunit": "^9"
@@ -213,7 +214,7 @@
                 "source": "https://github.com/tarantuli/medas-service-manager/tree/dev",
                 "issues": "https://github.com/tarantuli/medas-service-manager/issues"
             },
-            "time": "2023-05-01T09:13:19+00:00"
+            "time": "2023-05-01T14:38:55+00:00"
         },
         {
             "name": "myclabs/deep-copy",
