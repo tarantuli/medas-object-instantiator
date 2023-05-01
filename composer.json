@@ -1,0 +1,25 @@
+{
+    "name": "morphp/medas-placeholder",
+    "description": "Medas placeholder",
+    "authors": [
+        {
+            "name": "Patrick Morpey",
+            "email": "patrick@morphp.nl"
+        }
+    ],
+    "type": "library",
+    "minimum-stability": "dev",
+    "prefer-stable": true,
+    "require": {
+        "morphp/medas-service-manager": "dev-dev"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^9.5"
+    },
+    "autoload": {
+        "psr-4": {
+            "Medas\\Placeholder\\": "src/",
+            "Medas\\PlaceholderTest\\": "tests/"
+        }
+    }
+}
