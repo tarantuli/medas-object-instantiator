@@ -5,7 +5,9 @@ declare(strict_types=1);
 namespace Medas\ObjectInstantiator;
 
 use Medas\Core\AsSingleton;
+use Medas\ObjectInstantiator\ParameterResolving\PreferredDefaultFinder;
 use Medas\ServiceManager\BasePackage;
+use Medas\ServiceManager\ServiceConfig;
 
 class ObjectInstantiatorPackage extends BasePackage
 {
@@ -20,5 +22,14 @@ class ObjectInstantiatorPackage extends BasePackage
     public function sourceDirectory(): string
     {
         return __DIR__;
+    }
+
+    public function initialize(ServiceConfig $config): void
+    {
+        parent::initialize($config);
+
+        $config->addParameterResolver(
+            service(PreferredDefaultFinder::class)
+        );
     }
 }
