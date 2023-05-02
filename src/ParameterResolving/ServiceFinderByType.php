@@ -6,6 +6,8 @@ namespace Medas\ObjectInstantiator\ParameterResolving;
 
 use Medas\Core\Attributes\Service;
 use Medas\Core\GlobalRepository;
+use Medas\ObjectInstantiator\Exceptions\MultipleImplementorsFoundForParameter;
+use Medas\ServiceManager\Exceptions\MultipleImplementorsFound;
 
 #[Service]
 class ServiceFinderByType implements ParameterResolver
@@ -54,7 +56,18 @@ class ServiceFinderByType implements ParameterResolver
             return false;
         }
 
-        $this->result = $serviceManager->resolve($service);
+        try {
+            $this->result = $serviceManager->resolve($service);
+        }
+        catch (MultipleImplementorsFound $exception) {
+            throw (new MultipleImplementorsFoundForParameter(
+                $exception->type,
+                $parameter->name,
+                $parameter->getDeclaringClass()->name,
+                $parameter->getDeclaringFunction()->name,
+                $exception->implementors
+            ))->setPrevious($exception);
+        }
 
         return true;
     }
