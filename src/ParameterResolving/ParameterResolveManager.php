@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Medas\ObjectInstantiator\ParameterResolving;
 
 use Medas\Core\Attributes\Service;
-use Medas\Core\GlobalRepository;
 use Medas\ObjectInstantiator\Exceptions\CouldNotResolveParameter;
 use Medas\ServiceManager\ServiceConfig;
 
@@ -19,7 +18,7 @@ class ParameterResolveManager
         // This service is *not* instantiated automatically,
         // so don't add more dependencies, expecting them to be injected.
 
-        $serviceManager = GlobalRepository::serviceManager();
+        $serviceManager = medas()->serviceManager();
         $serviceManager->bindImplementation($this, ParameterResolveManager::class);
 
         $this->config = $serviceManager->config();

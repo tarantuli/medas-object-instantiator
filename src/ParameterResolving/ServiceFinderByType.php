@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Medas\ObjectInstantiator\ParameterResolving;
 
 use Medas\Core\Attributes\Service;
-use Medas\Core\GlobalRepository;
 use Medas\ObjectInstantiator\Exceptions\MultipleImplementorsFoundForParameter;
 use Medas\ServiceManager\Exceptions\MultipleImplementorsFound;
 
@@ -38,7 +37,7 @@ class ServiceFinderByType implements ParameterResolver
 
     public function handle(\ReflectionParameter|\ReflectionProperty $parameter): bool
     {
-        $serviceManager = GlobalRepository::serviceManager();
+        $serviceManager = medas()->serviceManager();
 
         $service = null;
         $types = parameterTypes($parameter);
