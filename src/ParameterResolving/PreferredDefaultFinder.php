@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Medas\ObjectInstantiator\ParameterResolving;
 
-use Medas\Core\Attributes\Service;
+use Medas\Core\{Attributes\Service, Interfaces\ParameterResolver};
 use Medas\ObjectInstantiator\Attributes\PreferredDefault;
 
 #[Service]
