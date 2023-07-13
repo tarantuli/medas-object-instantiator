@@ -5,11 +5,12 @@ declare(strict_types=1);
 namespace Medas\ObjectInstantiator\ParameterResolving;
 
 use Medas\Core\Attributes\Service;
+use Medas\Core\Interfaces\ParameterResolveManager as ManagerInterface;
 use Medas\ObjectInstantiator\Exceptions\CouldNotResolveParameter;
 use Medas\ServiceManager\ServiceConfig;
 
 #[Service]
-class ParameterResolveManager
+class ParameterResolveManager implements ManagerInterface
 {
     private ServiceConfig $config;
 
@@ -25,7 +26,7 @@ class ParameterResolveManager
         $this->config->addParameterResolver(new ServiceFinderByType());
     }
 
-    public function resolveMethod(\ReflectionMethod|\ReflectionFunction $method, array $givenArguments): array
+    public function resolveMethodParameters(\ReflectionMethod|\ReflectionFunction $method, array $givenArguments): array
     {
         $arguments = [];
 

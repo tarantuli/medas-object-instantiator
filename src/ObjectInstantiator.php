@@ -71,7 +71,7 @@ class ObjectInstantiator implements ObjectInstantiatorInterface
             return [];
         }
 
-        return $this->parameterResolveManager->resolveMethod($constructor, $givenArguments);
+        return $this->parameterResolveManager->resolveMethodParameters($constructor, $givenArguments);
     }
 
     public function resolveParameter(\ReflectionParameter|\ReflectionProperty $parameter): mixed
