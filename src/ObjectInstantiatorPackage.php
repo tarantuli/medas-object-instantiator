@@ -6,8 +6,7 @@ namespace Medas\ObjectInstantiator;
 
 use Medas\Core\AsSingleton;
 use Medas\ObjectInstantiator\ParameterResolving\PreferredDefaultFinder;
-use Medas\ServiceManager\BasePackage;
-use Medas\ServiceManager\ServiceConfig;
+use Medas\ServiceManager\{BasePackage, ServiceConfig};
 
 class ObjectInstantiatorPackage extends BasePackage
 {
@@ -15,8 +14,7 @@ class ObjectInstantiatorPackage extends BasePackage
 
     public function dependencies(): array
     {
-        return $this->dependenciesByClass([
-        ]);
+        return [];
     }
 
     public function sourceDirectory(): string

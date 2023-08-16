@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Medas\ObjectInstantiatorTest\Functional;
 
-use Medas\Core\GlobalRepository;
 use Medas\ObjectInstantiator\Exceptions\CouldNotResolveParameter;
 use Medas\ObjectInstantiator\ObjectInstantiator;
 use Medas\ObjectInstantiatorTest\BaseTestClass;
@@ -15,7 +14,7 @@ class InstantiationTest extends BaseTestClass
 {
     public function testBasicInstantiation(): void
     {
-        $service = GlobalRepository::objectInstantiator()->instantiate(Logger::class);
+        $service = medas()->objectInstantiator()->instantiate(Logger::class);
 
         self::assertInstanceOf(Logger::class, $service);
     }
@@ -24,7 +23,7 @@ class InstantiationTest extends BaseTestClass
     {
         $this->loadMockUps();
         $this->expectException(CouldNotResolveParameter::class);
-        GlobalRepository::objectInstantiator()->instantiate(ClassWithArgument::class);
+        medas()->objectInstantiator()->instantiate(ClassWithArgument::class);
     }
 
     public function testPassArgumentSuccess(): void
@@ -32,7 +31,7 @@ class InstantiationTest extends BaseTestClass
         $this->loadMockUps();
         service(ObjectInstantiator::class)->resetInstantiatingStack();
 
-        $object = GlobalRepository::objectInstantiator()->instantiate(ClassWithArgument::class, ['number' => 10]);
+        $object = medas()->objectInstantiator()->instantiate(ClassWithArgument::class, ['number' => 10]);
         self::assertInstanceOf(ClassWithArgument::class, $object);
     }
 }
