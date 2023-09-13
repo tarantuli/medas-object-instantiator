@@ -47,8 +47,10 @@ class ParameterResolveManager implements ManagerInterface
     public function resolveParameter(\ReflectionParameter|\ReflectionProperty $parameter): mixed
     {
         foreach ($this->config->parameterResolvers() as $resolver) {
-            if ($resolver->handle($parameter)) {
-                return $resolver->result();
+            $resolveResult = $resolver->handle($parameter);
+
+            if ($resolveResult->handled) {
+                return $resolveResult->result;
             }
         }
 

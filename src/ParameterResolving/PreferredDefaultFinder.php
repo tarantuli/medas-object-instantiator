@@ -4,44 +4,25 @@ declare(strict_types=1);
 
 namespace Medas\ObjectInstantiator\ParameterResolving;
 
-use Medas\Core\{Attributes\Service,Interfaces\ParameterResolver};
+use Medas\Core\{Attributes\Service, Interfaces\ParameterResolver, ParameterResolverResult};
 use Medas\Core\Attributes\PreferredDefault;
 
 #[Service]
 class PreferredDefaultFinder implements ParameterResolver
 {
-    private object $result;
-
     public function priority(): int
     {
         return -190;
     }
 
-    public function __serialize(): array
-    {
-        // This is needed to make sure $result isn't serialized
-        return [];
-    }
-
-    public function __unserialize(array $data): void
-    {
-        // Do nothing
-    }
-
-    public function handle(\ReflectionParameter|\ReflectionProperty $parameter): bool
+    public function handle(\ReflectionParameter|\ReflectionProperty $parameter): ParameterResolverResult
     {
         $preferredDefault = attribute(PreferredDefault::class, $parameter);
 
-        if ($preferredDefault) {
-            $this->result = service($preferredDefault->className);
-            return true;
+        if (!$preferredDefault) {
+            return new ParameterResolverResult(false);
         }
 
-        return false;
-    }
-
-    public function result(): object
-    {
-        return $this->result;
+        return new ParameterResolverResult(true, service($preferredDefault->className));
     }
 }

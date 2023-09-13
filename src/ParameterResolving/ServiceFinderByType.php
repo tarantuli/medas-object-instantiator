@@ -4,30 +4,17 @@ declare(strict_types=1);
 
 namespace Medas\ObjectInstantiator\ParameterResolving;
 
-use Medas\Core\{Attributes\Service, Interfaces\ParameterResolver};
+use Medas\Core\{Attributes\Service, Interfaces\ParameterResolver, ParameterResolverResult};
 use Medas\ObjectInstantiator\Exceptions\MultipleImplementorsFoundForParameter;
 use Medas\ServiceManager\Exceptions\MultipleImplementorsFound;
 
 #[Service]
 class ServiceFinderByType implements ParameterResolver
 {
-    private object $result;
-
     public function __construct()
     {
         // This service is *not* instantiated automatically,
         // so don't add more dependencies, expecting them to be injected.
-    }
-
-    public function __serialize(): array
-    {
-        // This is needed to make sure $result isn't serialized
-        return [];
-    }
-
-    public function __unserialize(array $data): void
-    {
-        // Do nothing
     }
 
     public function priority(): int
@@ -35,7 +22,7 @@ class ServiceFinderByType implements ParameterResolver
         return -200;
     }
 
-    public function handle(\ReflectionParameter|\ReflectionProperty $parameter): bool
+    public function handle(\ReflectionParameter|\ReflectionProperty $parameter): ParameterResolverResult
     {
         $serviceManager = medas()->serviceManager();
 
@@ -52,11 +39,11 @@ class ServiceFinderByType implements ParameterResolver
         }
 
         if (null === $service) {
-            return false;
+            return new ParameterResolverResult(false);
         }
 
         try {
-            $this->result = $serviceManager->resolve($service);
+            $result = $serviceManager->resolve($service);
         }
         catch (MultipleImplementorsFound $exception) {
             throw (new MultipleImplementorsFoundForParameter(
@@ -68,15 +55,6 @@ class ServiceFinderByType implements ParameterResolver
             ))->setPrevious($exception);
         }
 
-        return true;
-    }
-
-    public function result(): object
-    {
-        $result = $this->result;
-
-        unset($this->result);
-
-        return $result;
+        return new ParameterResolverResult(true, $result);
     }
 }
