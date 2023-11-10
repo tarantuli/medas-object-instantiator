@@ -15,6 +15,7 @@ class DebuggedCircularDependencyFound extends BaseException
         foreach ($trace as $class => $sourceFile) {
             $circle[] = "$class => $sourceFile";
         }
+
         parent::__construct(implode("\n*  ", $circle));
     }
 

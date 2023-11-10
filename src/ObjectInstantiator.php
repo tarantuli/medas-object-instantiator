@@ -4,8 +4,7 @@ declare(strict_types=1);
 
 namespace Medas\ObjectInstantiator;
 
-use Medas\Core\Attributes\Service;
-use Medas\Core\Interfaces\ObjectInstantiator as ObjectInstantiatorInterface;
+use Medas\Core\{Attributes\Service, Interfaces\ObjectInstantiator as ObjectInstantiatorInterface};
 
 #[Service]
 class ObjectInstantiator implements ObjectInstantiatorInterface
@@ -19,14 +18,15 @@ class ObjectInstantiator implements ObjectInstantiatorInterface
     {
         // This service is *not* instantiated automatically,
         // so don't add arguments and expect them to be injected.
-
         $this->parameterResolveManager = new ParameterResolving\ParameterResolveManager();
     }
 
     public function instantiate(string $type, array $givenArguments = []): object
     {
         $this->checkCircularDependencies($type);
+
         $arguments = $this->getConstructorArgumentValues($type, $givenArguments);
+
         unset($this->instantiating[$type]);
 
         return new $type(...$arguments);
@@ -54,7 +54,11 @@ class ObjectInstantiator implements ObjectInstantiatorInterface
             }
 
             if (isset($this->instantiating[$className])) {
-                throw new Exceptions\DebuggedCircularDependencyFound($this->instantiating, $className, $trace['file'] . ':' . $trace['line']);
+                throw new Exceptions\DebuggedCircularDependencyFound(
+                    $this->instantiating,
+                    $className,
+                    $trace['file'] . ':' . $trace['line']
+                );
             }
 
             $this->instantiating[$className] = $trace['file'] . ':' . $trace['line'];

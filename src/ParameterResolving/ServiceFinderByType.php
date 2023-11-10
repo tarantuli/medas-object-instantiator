@@ -25,7 +25,6 @@ class ServiceFinderByType implements ParameterResolver
     public function handle(\ReflectionParameter|\ReflectionProperty $parameter): ParameterResolverResult
     {
         $serviceManager = medas()->serviceManager();
-
         $service = null;
         $types = parameterTypes($parameter);
 
@@ -34,6 +33,7 @@ class ServiceFinderByType implements ParameterResolver
 
             if (null !== $serviceManager->findImplementingClass($typeName)) {
                 $service = $typeName;
+
                 break;
             }
         }

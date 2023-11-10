@@ -4,12 +4,10 @@ declare(strict_types=1);
 
 namespace Medas\ObjectInstantiator\Exceptions;
 
-use Medas\Core\Exceptions\BaseException;
-use Medas\Core\Exceptions\Suggestions;
+use Medas\Core\Exceptions\{BaseException, Suggestions};
 
 class MultipleImplementorsFoundForParameter extends BaseException implements Suggestions
 {
-
     public function __construct(
         string $type,
         string $parameter,

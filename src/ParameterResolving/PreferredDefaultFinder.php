@@ -4,8 +4,7 @@ declare(strict_types=1);
 
 namespace Medas\ObjectInstantiator\ParameterResolving;
 
-use Medas\Core\{Attributes\Service, Interfaces\ParameterResolver, ParameterResolverResult};
-use Medas\Core\Attributes\PreferredDefault;
+use Medas\Core\{Attributes\PreferredDefault, Attributes\Service, Interfaces\ParameterResolver, ParameterResolverResult};
 
 #[Service]
 class PreferredDefaultFinder implements ParameterResolver
