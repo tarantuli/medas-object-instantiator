@@ -24,6 +24,7 @@ class ObjectInstantiatorPackage extends BasePackage
     public function initialize(ServiceConfig $config): void
     {
         parent::initialize($config);
+
         $config->addParameterResolver(service(ParameterResolving\PreferredDefaultFinder::class));
     }
 }
