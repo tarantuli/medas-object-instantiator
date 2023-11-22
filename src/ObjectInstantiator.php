@@ -39,7 +39,10 @@ class ObjectInstantiator implements ObjectInstantiatorInterface
         }
         else {
             if (isset($this->instantiating[$className])) {
-                throw new Exceptions\CircularDependencyFound(array_keys($this->instantiating), $className);
+                throw new Exceptions\CircularDependencyFound(
+                    array_keys($this->instantiating),
+                    $className
+                );
             }
 
             $this->instantiating[$className] = true;
@@ -75,7 +78,10 @@ class ObjectInstantiator implements ObjectInstantiatorInterface
             return [];
         }
 
-        return $this->parameterResolveManager->resolveMethodParameters($constructor, $givenArguments);
+        return $this->parameterResolveManager->resolveMethodParameters(
+            $constructor,
+            $givenArguments
+        );
     }
 
     public function resolveParameter(\ReflectionParameter|\ReflectionProperty $parameter): mixed
