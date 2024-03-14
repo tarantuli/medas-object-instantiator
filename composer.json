@@ -1,6 +1,9 @@
 {
     "name": "morphp/medas-object-instantiator",
     "description": "Medas object instantiator",
+    "keywords": [
+        "services"
+    ],
     "authors": [
         {
             "name": "Patrick Morpey",
