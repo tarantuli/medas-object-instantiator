@@ -47,6 +47,15 @@ class ParameterResolveManager implements ManagerInterface
         return $arguments;
     }
 
+    private function processArgument(\ReflectionParameter $parameter, mixed $argument): mixed
+    {
+        foreach ($this->config->argumentProcessors() as $processor) {
+            $argument = $processor->process($parameter, $argument);
+        }
+
+        return $argument;
+    }
+
     public function resolveParameter(\ReflectionParameter|\ReflectionProperty $parameter): mixed
     {
         foreach ($this->config->parameterResolvers() as $resolver) {
@@ -70,14 +79,5 @@ class ParameterResolveManager implements ManagerInterface
         }
 
         throw new CouldNotResolveParameter($parameter);
-    }
-
-    private function processArgument(\ReflectionParameter $parameter, mixed $argument): mixed
-    {
-        foreach ($this->config->argumentProcessors() as $processor) {
-            $argument = $processor->process($parameter, $argument);
-        }
-
-        return $argument;
     }
 }
