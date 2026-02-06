@@ -15,8 +15,9 @@
   "minimum-stability": "dev",
   "prefer-stable": true,
   "require": {
-    "morphp/medas-core": "^2",
-    "morphp/medas-service-manager": "^2"
+    "php": "^8.2",
+    "morphp/medas-core": "^1",
+    "morphp/medas-service-manager": "^1"
   },
   "require-dev": {
     "phpunit/phpunit": "^9.5"
