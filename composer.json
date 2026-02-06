@@ -1,7 +1,7 @@
 {
   "name": "morphp/medas-object-instantiator",
   "description": "Medas object instantiator",
-  "version": "2.0.0",
+  "version": "1.0.0",
   "keywords": [
     "services"
   ],
