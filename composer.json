@@ -1,29 +1,30 @@
 {
-    "name": "morphp/medas-object-instantiator",
-    "description": "Medas object instantiator",
-    "keywords": [
-        "services"
-    ],
-    "authors": [
-        {
-            "name": "Patrick Morpey",
-            "email": "patrick@morphp.nl"
-        }
-    ],
-    "type": "library",
-    "minimum-stability": "dev",
-    "prefer-stable": true,
-    "require": {
-        "morphp/medas-core": "dev-dev",
-        "morphp/medas-service-manager": "dev-dev"
-    },
-    "require-dev": {
-        "phpunit/phpunit": "^9.5"
-    },
-    "autoload": {
-        "psr-4": {
-            "Medas\\ObjectInstantiator\\": "src/",
-            "Medas\\ObjectInstantiatorTest\\": "tests/"
-        }
+  "name": "morphp/medas-object-instantiator",
+  "description": "Medas object instantiator",
+  "version": "2.0.0",
+  "keywords": [
+    "services"
+  ],
+  "authors": [
+    {
+      "name": "Patrick Morpey",
+      "email": "patrick@morphp.nl"
     }
+  ],
+  "type": "library",
+  "minimum-stability": "dev",
+  "prefer-stable": true,
+  "require": {
+    "morphp/medas-core": "^2",
+    "morphp/medas-service-manager": "^2"
+  },
+  "require-dev": {
+    "phpunit/phpunit": "^9.5"
+  },
+  "autoload": {
+    "psr-4": {
+      "Medas\\ObjectInstantiator\\": "src/",
+      "Medas\\ObjectInstantiatorTest\\": "tests/"
+    }
+  }
 }
