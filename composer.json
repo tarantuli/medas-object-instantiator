@@ -1,7 +1,7 @@
 {
   "name": "morphp/medas-object-instantiator",
   "description": "Medas object instantiator",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "keywords": [
     "services"
   ],
@@ -16,7 +16,8 @@
   "prefer-stable": true,
   "require": {
     "morphp/medas-core": "^2",
-    "morphp/medas-service-manager": "^2"
+    "morphp/medas-service-manager": "^2",
+    "php": "^8.2"
   },
   "require-dev": {
     "phpunit/phpunit": "^9.5"
