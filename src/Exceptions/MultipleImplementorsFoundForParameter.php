@@ -9,11 +9,12 @@ use Medas\Core\Exceptions\{BaseException, Suggestions};
 class MultipleImplementorsFoundForParameter extends BaseException implements Suggestions
 {
     public function __construct(
-        string $type,
-        string $parameter,
-        string $class,
-        string $method,
-        array  $implementors,
+        string                      $type,
+        string                      $parameter,
+        string                      $class,
+        string                      $method,
+        array                       $implementors,
+        private readonly \Throwable $previous,
     )
     {
         parent::__construct($type, $parameter, $class, $method, implode(', ', $implementors));
@@ -29,5 +30,10 @@ class MultipleImplementorsFoundForParameter extends BaseException implements Sug
         return [
             'bind the one you want to use using sm()->bindImplementation()',
         ];
+    }
+
+    public function previous(): \Throwable|null
+    {
+        return $this->previous;
     }
 }

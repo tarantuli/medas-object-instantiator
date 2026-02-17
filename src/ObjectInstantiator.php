@@ -25,9 +25,13 @@ class ObjectInstantiator implements ObjectInstantiatorInterface
     {
         $this->checkCircularDependencies($type);
 
-        $arguments = $this->getConstructorArgumentValues($type, $givenArguments);
+        try {
+            $arguments = $this->getConstructorArgumentValues($type, $givenArguments);
+        }
 
-        unset($this->instantiating[$type]);
+        finally{
+            unset($this->instantiating[$type]);
+        }
 
         return new $type(...$arguments);
     }
@@ -52,7 +56,7 @@ class ObjectInstantiator implements ObjectInstantiatorInterface
     private function checkCircularDependenciesWithAdditionalDebugging(string $className): void
     {
         foreach (array_reverse(debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS)) as $trace) {
-            if (str_starts_with($trace['file'], __NAMESPACE__ . '\\')) {
+            if (str_starts_with($trace['file'], __DIR__ . '\\')) {
                 continue;
             }
 

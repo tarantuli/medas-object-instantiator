@@ -10,9 +10,18 @@ class CouldNotResolveParameter extends BaseException
 {
     public function __construct(\ReflectionParameter $parameter)
     {
+        $declaringClass = $parameter->getDeclaringClass();
+
+        if ($declaringClass) {
+            $message = $declaringClass->name . '::' . $parameter->getDeclaringFunction()->name;
+        }
+        else {
+            $message = $parameter->getDeclaringFunction()->name;
+        }
+
         parent::__construct(
             '$' . $parameter->name,
-            $parameter->getDeclaringClass()->name . '::' . $parameter->getDeclaringFunction()->name,
+            $message,
         );
     }
 

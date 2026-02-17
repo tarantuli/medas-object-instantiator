@@ -46,13 +46,14 @@ class ServiceFinderByType implements ParameterResolver
             $result = $serviceManager->resolve($service);
         }
         catch (MultipleImplementorsFound $exception) {
-            throw (new MultipleImplementorsFoundForParameter(
+            throw new MultipleImplementorsFoundForParameter(
                 $exception->type,
                 $parameter->name,
                 $parameter->getDeclaringClass()->name,
                 $parameter->getDeclaringFunction()->name,
-                $exception->implementors
-            ))->setPrevious($exception);
+                $exception->implementors,
+                $exception
+            );
         }
 
         return new ParameterResolverResult(true, $result);
