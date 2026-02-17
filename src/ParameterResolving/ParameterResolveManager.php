@@ -4,21 +4,23 @@ declare(strict_types=1);
 
 namespace Medas\ObjectInstantiator\ParameterResolving;
 
-use Medas\Core\{Attributes\Service, Interfaces\ParameterResolveManager as ManagerInterface};
+use Medas\Core\{
+    Attributes\Service,
+    Interfaces\ParameterResolveManager as ManagerInterface,
+    Interfaces\ServiceConfig,
+    Interfaces\ServiceManager
+};
 use Medas\ObjectInstantiator\Exceptions\CouldNotResolveParameter;
-use Medas\ServiceManager\ServiceConfig;
 
 #[Service]
 class ParameterResolveManager implements ManagerInterface
 {
     private ServiceConfig $config;
 
-    public function __construct()
+    public function __construct(ServiceManager $serviceManager)
     {
         // This service is *not* instantiated automatically,
         // so don't add more dependencies, expecting them to be injected.
-        $serviceManager = medas()->serviceManager();
-
         $serviceManager->bindImplementation($this, ParameterResolveManager::class);
 
         $this->config = $serviceManager->config();

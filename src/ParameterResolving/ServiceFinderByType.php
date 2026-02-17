@@ -5,8 +5,10 @@ declare(strict_types=1);
 namespace Medas\ObjectInstantiator\ParameterResolving;
 
 use Medas\Core\{Attributes\Service, Interfaces\ParameterResolver, ParameterResolverResult};
-use Medas\ObjectInstantiator\Exceptions\MultipleImplementorsFoundForParameter;
-use Medas\ServiceManager\Exceptions\MultipleImplementorsFound;
+use Medas\ObjectInstantiator\Exceptions\{
+    MultipleImplementorsFound,
+    MultipleImplementorsFoundForParameter
+};
 
 #[Service]
 class ServiceFinderByType implements ParameterResolver
