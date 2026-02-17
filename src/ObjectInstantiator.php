@@ -4,7 +4,11 @@ declare(strict_types=1);
 
 namespace Medas\ObjectInstantiator;
 
-use Medas\Core\{Attributes\Service, Interfaces\ObjectInstantiator as ObjectInstantiatorInterface};
+use Medas\Core\{
+    Attributes\Service,
+    Interfaces\ObjectInstantiator as ObjectInstantiatorInterface,
+    Interfaces\ServiceManager
+};
 
 #[Service]
 class ObjectInstantiator implements ObjectInstantiatorInterface
@@ -14,11 +18,11 @@ class ObjectInstantiator implements ObjectInstantiatorInterface
     /** @var string[] */
     private array $instantiating = [];
 
-    public function __construct()
+    public function __construct(ServiceManager $serviceManager)
     {
         // This service is *not* instantiated automatically,
         // so don't add arguments and expect them to be injected.
-        $this->parameterResolveManager = new ParameterResolving\ParameterResolveManager();
+        $this->parameterResolveManager = new ParameterResolving\ParameterResolveManager($serviceManager);
     }
 
     public function instantiate(string $type, array $givenArguments = []): object
