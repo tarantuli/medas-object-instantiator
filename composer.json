@@ -1,7 +1,6 @@
 {
   "name": "morphp/medas-object-instantiator",
   "description": "Medas object instantiator",
-  "version": "3.0.2",
   "keywords": [
     "services"
   ],
@@ -12,8 +11,6 @@
     }
   ],
   "type": "library",
-  "minimum-stability": "dev",
-  "prefer-stable": true,
   "require": {
     "morphp/medas-core": "^3",
     "php": "^8.4"
