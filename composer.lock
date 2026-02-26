@@ -8,16 +8,16 @@
     "packages": [
         {
             "name": "morphp/medas-core",
-            "version": "v3.0.4",
+            "version": "v3.0.10",
             "source": {
                 "type": "git",
                 "url": "https://github.com/tarantuli/medas-core.git",
-                "reference": "99115e657ae40328492aa18b1916ed4f8b0faedf"
+                "reference": "c2890df2b82206003845ccbe8ec6736d7b13ab47"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/tarantuli/medas-core/zipball/99115e657ae40328492aa18b1916ed4f8b0faedf",
-                "reference": "99115e657ae40328492aa18b1916ed4f8b0faedf",
+                "url": "https://api.github.com/repos/tarantuli/medas-core/zipball/c2890df2b82206003845ccbe8ec6736d7b13ab47",
+                "reference": "c2890df2b82206003845ccbe8ec6736d7b13ab47",
                 "shasum": ""
             },
             "require": {
@@ -26,13 +26,17 @@
                 "psr/event-dispatcher": "^1.0"
             },
             "require-dev": {
-                "morphp/medas-service-manager": "^2",
+                "morphp/medas-service-manager": "^3",
                 "phpunit/phpunit": "^10"
             },
             "type": "library",
             "autoload": {
                 "psr-4": {
-                    "Medas\\Core\\": "src/",
+                    "Medas\\Core\\": "src/"
+                }
+            },
+            "autoload-dev": {
+                "psr-4": {
                     "Medas\\CoreTest\\": "tests/"
                 }
             },
@@ -47,10 +51,10 @@
                 "medas"
             ],
             "support": {
-                "source": "https://github.com/tarantuli/medas-core/tree/v3.0.4",
+                "source": "https://github.com/tarantuli/medas-core/tree/v3.0.10",
                 "issues": "https://github.com/tarantuli/medas-core/issues"
             },
-            "time": "2026-02-19T15:23:52+00:00"
+            "time": "2026-02-26T15:56:04+00:00"
         },
         {
             "name": "psr/event-dispatcher",
@@ -151,16 +155,16 @@
         },
         {
             "name": "morphp/medas-service-manager",
-            "version": "3.0.2",
+            "version": "v3.0.11",
             "source": {
                 "type": "git",
                 "url": "https://github.com/tarantuli/medas-service-manager.git",
-                "reference": "d076612cdddb98702c69b3b803c89adc2160cf33"
+                "reference": "9ac3f4f96152dac0447993fbebaa199c829ab86c"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/tarantuli/medas-service-manager/zipball/d076612cdddb98702c69b3b803c89adc2160cf33",
-                "reference": "d076612cdddb98702c69b3b803c89adc2160cf33",
+                "url": "https://api.github.com/repos/tarantuli/medas-service-manager/zipball/9ac3f4f96152dac0447993fbebaa199c829ab86c",
+                "reference": "9ac3f4f96152dac0447993fbebaa199c829ab86c",
                 "shasum": ""
             },
             "require": {
@@ -170,12 +174,16 @@
                 "php": "^8.4"
             },
             "require-dev": {
-                "phpunit/phpunit": "^9"
+                "phpunit/phpunit": "^10"
             },
             "type": "library",
             "autoload": {
                 "psr-4": {
-                    "Medas\\ServiceManager\\": "src/",
+                    "Medas\\ServiceManager\\": "src/"
+                }
+            },
+            "autoload-dev": {
+                "psr-4": {
                     "Medas\\ServiceManagerTest\\": "tests/"
                 }
             },
@@ -190,10 +198,10 @@
                 "services"
             ],
             "support": {
-                "source": "https://github.com/tarantuli/medas-service-manager/tree/v3.0.2",
+                "source": "https://github.com/tarantuli/medas-service-manager/tree/v3.0.11",
                 "issues": "https://github.com/tarantuli/medas-service-manager/issues"
             },
-            "time": "2026-02-17T11:29:44+00:00"
+            "time": "2026-02-26T16:07:03+00:00"
         },
         {
             "name": "myclabs/deep-copy",

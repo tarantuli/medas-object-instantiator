@@ -4,8 +4,7 @@ declare(strict_types=1);
 
 namespace Medas\ObjectInstantiator;
 
-use Medas\Core\AsSingleton;
-use Medas\ServiceManager\{BasePackage, ServiceConfig};
+use Medas\Core\{AsSingleton, BasePackage, Interfaces\ServiceConfig};
 
 class ObjectInstantiatorPackage extends BasePackage
 {

@@ -21,7 +21,11 @@
   },
   "autoload": {
     "psr-4": {
-      "Medas\\ObjectInstantiator\\": "src/",
+      "Medas\\ObjectInstantiator\\": "src/"
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
       "Medas\\ObjectInstantiatorTest\\": "tests/"
     }
   }
