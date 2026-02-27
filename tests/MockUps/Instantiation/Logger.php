@@ -9,5 +9,4 @@ use Medas\Core\Attributes\Service;
 #[Service]
 class Logger
 {
-
 }
