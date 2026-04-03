@@ -17,7 +17,9 @@ class ParameterResolveManager implements ManagerInterface
 {
     private ServiceConfig $config;
 
-    public function __construct(ServiceManager $serviceManager)
+    public function __construct(
+        ServiceManager $serviceManager,
+    )
     {
         // This service is *not* instantiated automatically,
         // so don't add more dependencies, expecting them to be injected.
@@ -25,7 +27,7 @@ class ParameterResolveManager implements ManagerInterface
 
         $this->config = $serviceManager->config();
 
-        $this->config->addParameterResolver(new ServiceFinderByType());
+        $this->config->addParameterResolver(new ServiceFinderByType($serviceManager));
     }
 
     public function resolveMethodParameters(
