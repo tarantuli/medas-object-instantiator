@@ -6,6 +6,8 @@ namespace Medas\ObjectInstantiator;
 
 use Medas\Core\{
     Attributes\Service,
+    Exceptions\CircularDependencyFound,
+    Exceptions\DebuggedCircularDependencyFound,
     Interfaces\ObjectInstantiator as ObjectInstantiatorInterface,
     Interfaces\ServiceManager
 };
@@ -47,10 +49,7 @@ class ObjectInstantiator implements ObjectInstantiatorInterface
         }
         else {
             if (isset($this->instantiating[$className])) {
-                throw new Exceptions\CircularDependencyFound(
-                    array_keys($this->instantiating),
-                    $className
-                );
+                throw new CircularDependencyFound(array_keys($this->instantiating), $className);
             }
 
             $this->instantiating[$className] = true;
@@ -65,7 +64,7 @@ class ObjectInstantiator implements ObjectInstantiatorInterface
             }
 
             if (isset($this->instantiating[$className])) {
-                throw new Exceptions\DebuggedCircularDependencyFound(
+                throw new DebuggedCircularDependencyFound(
                     $this->instantiating,
                     $className,
                     $trace['file'] . ':' . $trace['line']

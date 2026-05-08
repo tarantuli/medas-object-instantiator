@@ -4,13 +4,9 @@ declare(strict_types=1);
 
 namespace Medas\ObjectInstantiatorTest\Functional;
 
-use Medas\ObjectInstantiator\Exceptions\CircularDependencyFound;
+use Medas\Core\Exceptions\CircularDependencyFound;
 use Medas\ObjectInstantiatorTest\BaseTestClass;
-use Medas\ObjectInstantiatorTest\MockUps\CircularDependencies\{
-    DirectDependency1,
-    IndirectDependency1,
-    SelfDependency
-};
+use Medas\ObjectInstantiatorTest\MockUps\CircularDependencies\{DirectDependency1,IndirectDependency1,SelfDependency};
 
 class CircularDependenciesTest extends BaseTestClass
 {

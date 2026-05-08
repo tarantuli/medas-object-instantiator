@@ -6,13 +6,11 @@ namespace Medas\ObjectInstantiator\ParameterResolving;
 
 use Medas\Core\{
     Attributes\Service,
+    Exceptions\MultipleImplementorsFound,
+    Exceptions\MultipleImplementorsFoundForParameter,
     Interfaces\ParameterResolver,
     Interfaces\ServiceManager,
     ParameterResolverResult
-};
-use Medas\ObjectInstantiator\Exceptions\{
-    MultipleImplementorsFound,
-    MultipleImplementorsFoundForParameter
 };
 
 #[Service]

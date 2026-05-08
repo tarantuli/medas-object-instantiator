@@ -6,11 +6,11 @@ namespace Medas\ObjectInstantiator\ParameterResolving;
 
 use Medas\Core\{
     Attributes\Service,
+    Exceptions\CouldNotResolveParameter,
     Interfaces\ParameterResolveManager as ManagerInterface,
     Interfaces\ServiceConfig,
     Interfaces\ServiceManager
 };
-use Medas\ObjectInstantiator\Exceptions\CouldNotResolveParameter;
 
 #[Service]
 class ParameterResolveManager implements ManagerInterface
