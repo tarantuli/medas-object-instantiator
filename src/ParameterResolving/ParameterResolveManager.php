@@ -30,6 +30,8 @@ class ParameterResolveManager implements ManagerInterface
         private readonly array $argumentProcessorNames,
     )
     {
+        // This service is *not* instantiated automatically,
+        // so don't add arguments and expect them to be injected.
     }
 
     public function resolveMethodParameters(
@@ -57,6 +59,8 @@ class ParameterResolveManager implements ManagerInterface
     {
         if ($this->argumentProcessors === null) {
             $this->argumentProcessors = namesToServices($this->argumentProcessorNames);
+
+            uasort($this->argumentProcessors, fn($a, $b) => -$a->priority() <=> $b->priority());
         }
 
         foreach ($this->argumentProcessors as $processor) {
@@ -70,6 +74,8 @@ class ParameterResolveManager implements ManagerInterface
     {
         if ($this->parameterResolvers === null) {
             $this->parameterResolvers = namesToServices($this->parameterResolverNames);
+
+            uasort($this->parameterResolvers, fn($a, $b) => -$a->priority() <=> $b->priority());
         }
 
         foreach ($this->parameterResolvers as $resolver) {
