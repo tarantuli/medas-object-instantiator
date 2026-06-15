@@ -58,7 +58,10 @@ class ParameterResolveManager implements ManagerInterface
     private function processArgument(\ReflectionParameter $parameter, mixed $argument): mixed
     {
         if ($this->argumentProcessors === null) {
-            $this->argumentProcessors = namesToServices($this->argumentProcessorNames);
+            $this->argumentProcessors = array_map(
+                fn(string $name) => new $name(),
+                $this->argumentProcessorNames
+            );
 
             uasort($this->argumentProcessors, fn($a, $b) => -$a->priority() <=> $b->priority());
         }
@@ -73,7 +76,10 @@ class ParameterResolveManager implements ManagerInterface
     public function resolveParameter(\ReflectionParameter|\ReflectionProperty $parameter): mixed
     {
         if ($this->parameterResolvers === null) {
-            $this->parameterResolvers = namesToServices($this->parameterResolverNames);
+            $this->parameterResolvers = array_map(
+                fn(string $name) => new $name(),
+                $this->parameterResolverNames
+            );
 
             uasort($this->parameterResolvers, fn($a, $b) => -$a->priority() <=> $b->priority());
         }
