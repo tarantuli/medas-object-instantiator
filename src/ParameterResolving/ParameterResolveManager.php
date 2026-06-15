@@ -7,27 +7,29 @@ namespace Medas\ObjectInstantiator\ParameterResolving;
 use Medas\Core\{
     Attributes\Service,
     Exceptions\CouldNotResolveParameter,
+    Interfaces\ArgumentProcessor,
     Interfaces\ParameterResolveManager as ManagerInterface,
-    Interfaces\ServiceConfig,
-    Interfaces\ServiceManager
+    Interfaces\ParameterResolver
 };
 
 #[Service]
 class ParameterResolveManager implements ManagerInterface
 {
-    private ServiceConfig $config;
+    /** @var ParameterResolver[]|null */
+    private array|null $parameterResolvers = null;
 
+    /** @var ArgumentProcessor[]|null */
+    private array|null $argumentProcessors = null;
+
+    /**
+     * @param string[] $parameterResolverNames
+     * @param string[] $argumentProcessorNames
+     */
     public function __construct(
-        ServiceManager $serviceManager,
+        private readonly array $parameterResolverNames,
+        private readonly array $argumentProcessorNames,
     )
     {
-        // This service is *not* instantiated automatically,
-        // so don't add more dependencies, expecting them to be injected.
-        $serviceManager->bindImplementation($this, ParameterResolveManager::class);
-
-        $this->config = $serviceManager->config();
-
-        $this->config->addParameterResolver(new ServiceFinderByType($serviceManager));
     }
 
     public function resolveMethodParameters(
@@ -53,7 +55,11 @@ class ParameterResolveManager implements ManagerInterface
 
     private function processArgument(\ReflectionParameter $parameter, mixed $argument): mixed
     {
-        foreach ($this->config->argumentProcessors() as $processor) {
+        if ($this->argumentProcessors === null) {
+            $this->argumentProcessors = namesToServices($this->argumentProcessorNames);
+        }
+
+        foreach ($this->argumentProcessors as $processor) {
             $argument = $processor->process($parameter, $argument);
         }
 
@@ -62,7 +68,11 @@ class ParameterResolveManager implements ManagerInterface
 
     public function resolveParameter(\ReflectionParameter|\ReflectionProperty $parameter): mixed
     {
-        foreach ($this->config->parameterResolvers() as $resolver) {
+        if ($this->parameterResolvers === null) {
+            $this->parameterResolvers = namesToServices($this->parameterResolverNames);
+        }
+
+        foreach ($this->parameterResolvers as $resolver) {
             $resolveResult = $resolver->handle($parameter);
 
             if ($resolveResult->handled) {

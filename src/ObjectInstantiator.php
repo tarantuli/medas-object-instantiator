@@ -8,8 +8,7 @@ use Medas\Core\{
     Attributes\Service,
     Exceptions\CircularDependencyFound,
     Exceptions\DebuggedCircularDependencyFound,
-    Interfaces\ObjectInstantiator as ObjectInstantiatorInterface,
-    Interfaces\ServiceManager
+    Interfaces\ObjectInstantiator as ObjectInstantiatorInterface
 };
 
 #[Service]
@@ -20,11 +19,17 @@ class ObjectInstantiator implements ObjectInstantiatorInterface
     /** @var string[] */
     private array $instantiating = [];
 
-    public function __construct(ServiceManager $serviceManager)
+    public function __construct(
+        array $parameterResolverNames,
+        array $argumentProcessorNames,
+    )
     {
         // This service is *not* instantiated automatically,
         // so don't add arguments and expect them to be injected.
-        $this->parameterResolveManager = new ParameterResolving\ParameterResolveManager($serviceManager);
+        $this->parameterResolveManager = new ParameterResolving\ParameterResolveManager(
+            $parameterResolverNames,
+            $argumentProcessorNames
+        );
     }
 
     public function instantiate(string $type, array $givenArguments = []): object
