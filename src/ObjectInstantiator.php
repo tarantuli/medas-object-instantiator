@@ -19,6 +19,8 @@ class ObjectInstantiator implements ObjectInstantiatorInterface
     /** @var string[] */
     private array $instantiating = [];
 
+    private array $functionsToSkip;
+
     public function __construct(
         array $parameterResolverNames,
         array $argumentProcessorNames,
@@ -30,10 +32,27 @@ class ObjectInstantiator implements ObjectInstantiatorInterface
             $parameterResolverNames,
             $argumentProcessorNames
         );
+
+        if (defined('DEBUG_CIRCULAR_DEPENDENCIES')) {
+            $this->functionsToSkip = [
+                'Medas\ObjectInstantiator\ObjectInstantiator' => [
+                    'checkCircularDependencies',
+                    'checkCircularDependenciesWithAdditionalDebugging',
+                    'instantiate',
+                ],
+                'Medas\ObjectInstantiator\ParameterResolving\ServiceFinderByType' => [
+                    'handle',
+                ],
+                'Medas\ServiceManager\ServiceManager' => [
+                    'resolve',
+                ],
+            ];
+        }
     }
 
     public function instantiate(string $type, array $givenArguments = []): object
     {
+        // funcdump($type, $this->instantiating);
         $this->checkCircularDependencies($type);
 
         try {
@@ -63,20 +82,32 @@ class ObjectInstantiator implements ObjectInstantiatorInterface
 
     private function checkCircularDependenciesWithAdditionalDebugging(string $className): void
     {
-        foreach (array_reverse(debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS)) as $trace) {
-            if (str_starts_with($trace['file'], __DIR__ . '\\')) {
+        foreach (debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS) as $trace) {
+            if (isset($trace['class'])
+                    && in_array($trace['function'], $this->functionsToSkip[$trace['class']] ?? [], true)) {
                 continue;
+            }
+
+            if (!isset($trace['class']) && $trace['function'] === 'service') {
+                continue;
+            }
+
+            if (isset($trace['class'])) {
+                $source = $trace['class'] . $trace['type'] . $trace['function'];
+            }
+            else {
+                $source = $trace['function'];
             }
 
             if (isset($this->instantiating[$className])) {
                 throw new DebuggedCircularDependencyFound(
                     $this->instantiating,
                     $className,
-                    $trace['file'] . ':' . $trace['line']
+                    $source
                 );
             }
 
-            $this->instantiating[$className] = $trace['file'] . ':' . $trace['line'];
+            $this->instantiating[$className] = $source;
 
             return;
         }
