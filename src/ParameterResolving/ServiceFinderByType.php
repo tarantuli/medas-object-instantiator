@@ -5,25 +5,14 @@ declare(strict_types=1);
 namespace Medas\ObjectInstantiator\ParameterResolving;
 
 use Medas\Core\{
-    Attributes\Service,
     Exceptions\MultipleImplementorsFound,
     Exceptions\MultipleImplementorsFoundForParameter,
     Interfaces\ParameterResolver,
-    Interfaces\ServiceManager,
     ParameterResolverResult
 };
 
-#[Service]
 readonly class ServiceFinderByType implements ParameterResolver
 {
-    public function __construct(
-        private ServiceManager $serviceManager,
-    )
-    {
-        // This service is *not* instantiated automatically,
-        // so don't add more dependencies, expecting them to be injected.
-    }
-
     public function priority(): int
     {
         return -200;
@@ -38,7 +27,7 @@ readonly class ServiceFinderByType implements ParameterResolver
         }
 
         try {
-            $result = $this->serviceManager->resolve($service);
+            $result = sm()->resolve($service);
         }
         catch (MultipleImplementorsFound $exception) {
             throw new MultipleImplementorsFoundForParameter(
@@ -61,7 +50,7 @@ readonly class ServiceFinderByType implements ParameterResolver
         foreach ($types as $type) {
             $typeName = $type->getName();
 
-            if (null !== $this->serviceManager->findImplementingClass($typeName)) {
+            if (null !== sm()->findImplementingClass($typeName)) {
                 return $typeName;
             }
         }
