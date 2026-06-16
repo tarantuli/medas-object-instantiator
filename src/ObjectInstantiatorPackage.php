@@ -26,6 +26,6 @@ class ObjectInstantiatorPackage extends BasePackage
 
         $config->addParameterResolver(ParameterResolving\ServiceFinderByType::class);
         $config->addParameterResolver(ParameterResolving\EnvValueResolver::class);
-        $config->addParameterResolver(ParameterResolving\EnvValueResolver::class);
+        $config->addParameterResolver(ParameterResolving\PreferredDefaultFinder::class);
     }
 }
