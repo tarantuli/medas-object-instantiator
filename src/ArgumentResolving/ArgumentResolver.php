@@ -2,18 +2,17 @@
 
 declare(strict_types=1);
 
-namespace Medas\ObjectInstantiator\ParameterResolving;
+namespace Medas\ObjectInstantiator\ArgumentResolving;
 
 use Medas\Core\{
     Attributes\Service,
     Exceptions\CouldNotResolveParameter,
     Interfaces\ArgumentProcessor,
-    Interfaces\ParameterResolveManager as ManagerInterface,
     Interfaces\ParameterResolver
 };
 
 #[Service]
-class ParameterResolveManager implements ManagerInterface
+class ArgumentResolver
 {
     /** @var ParameterResolver[]|null */
     private array|null $parameterResolvers = null;
@@ -58,12 +57,7 @@ class ParameterResolveManager implements ManagerInterface
     private function processArgument(\ReflectionParameter $parameter, mixed $argument): mixed
     {
         if ($this->argumentProcessors === null) {
-            $this->argumentProcessors = array_map(
-                fn(string $name) => new $name(),
-                $this->argumentProcessorNames
-            );
-
-            uasort($this->argumentProcessors, fn($a, $b) => -$a->priority() <=> $b->priority());
+            $this->loadArgumentProcessors();
         }
 
         foreach ($this->argumentProcessors as $processor) {
@@ -73,15 +67,20 @@ class ParameterResolveManager implements ManagerInterface
         return $argument;
     }
 
+    private function loadArgumentProcessors(): void
+    {
+        $this->argumentProcessors = array_map(
+            fn(string $name) => new $name(),
+            $this->argumentProcessorNames
+        );
+
+        uasort($this->argumentProcessors, fn($a, $b) => -$a->priority() <=> $b->priority());
+    }
+
     public function resolveParameter(\ReflectionParameter|\ReflectionProperty $parameter): mixed
     {
         if ($this->parameterResolvers === null) {
-            $this->parameterResolvers = array_map(
-                fn(string $name) => new $name(),
-                $this->parameterResolverNames
-            );
-
-            uasort($this->parameterResolvers, fn($a, $b) => -$a->priority() <=> $b->priority());
+            $this->loadParameterResolvers();
         }
 
         foreach ($this->parameterResolvers as $resolver) {
@@ -105,5 +104,15 @@ class ParameterResolveManager implements ManagerInterface
         }
 
         throw new CouldNotResolveParameter($parameter);
+    }
+
+    private function loadParameterResolvers(): void
+    {
+        $this->parameterResolvers = array_map(
+            fn(string $name) => new $name(),
+            $this->parameterResolverNames
+        );
+
+        uasort($this->parameterResolvers, fn($a, $b) => -$a->priority() <=> $b->priority());
     }
 }

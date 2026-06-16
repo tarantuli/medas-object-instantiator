@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Medas\ObjectInstantiator\CircularDependencies;
 
-use Medas\ObjectInstantiator\ParameterResolving;
+use Medas\ObjectInstantiator\ArgumentResolving;
 
 class CheckerWithVerboseTracing
 {
@@ -56,7 +56,7 @@ class CheckerWithVerboseTracing
 
     private function compileSource(array $trace): string
     {
-        if ($trace['class'] === ParameterResolving\ParameterResolveManager::class
+        if ($trace['class'] === ArgumentResolving\ArgumentResolver::class
                 && $trace['function'] === 'resolveParameter') {
             /** @var \ReflectionParameter $parameter */
             $parameter = $trace['args'][0];

@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Medas\ObjectInstantiator\ParameterResolving;
+namespace Medas\ObjectInstantiator\ArgumentResolving;
 
 use Medas\Core\{
     Attributes\EnvValue,

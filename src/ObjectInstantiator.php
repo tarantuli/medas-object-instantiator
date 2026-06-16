@@ -9,7 +9,7 @@ use Medas\Core\{Attributes\Service, Interfaces\ObjectInstantiator as ObjectInsta
 #[Service]
 readonly class ObjectInstantiator implements ObjectInstantiatorInterface
 {
-    private ParameterResolving\ParameterResolveManager $parameterResolveManager;
+    private ArgumentResolving\ArgumentResolver $argumentResolver;
     private CircularDependencies\Checker $circularDependencyChecker;
     private CircularDependencies\CheckerWithVerboseTracing $verbodeCircularDependencyChecker;
 
@@ -20,7 +20,7 @@ readonly class ObjectInstantiator implements ObjectInstantiatorInterface
     {
         // This service is *not* instantiated automatically,
         // so don't add arguments and expect them to be injected.
-        $this->parameterResolveManager = new ParameterResolving\ParameterResolveManager(
+        $this->argumentResolver = new ArgumentResolving\ArgumentResolver(
             $parameterResolverNames,
             $argumentProcessorNames
         );
@@ -62,15 +62,7 @@ readonly class ObjectInstantiator implements ObjectInstantiatorInterface
             return [];
         }
 
-        return $this->parameterResolveManager->resolveMethodParameters(
-            $constructor,
-            $givenArguments
-        );
-    }
-
-    public function resolveParameter(\ReflectionParameter|\ReflectionProperty $parameter): mixed
-    {
-        return $this->parameterResolveManager->resolveParameter($parameter);
+        return $this->argumentResolver->resolveMethodParameters($constructor, $givenArguments);
     }
 
     public function resetInstantiatingStack(): void
@@ -81,5 +73,18 @@ readonly class ObjectInstantiator implements ObjectInstantiatorInterface
         else {
             $this->circularDependencyChecker->reset();
         }
+    }
+
+    public function resolveParameter(\ReflectionParameter|\ReflectionProperty $parameter): mixed
+    {
+        return $this->argumentResolver->resolveParameter($parameter);
+    }
+
+    public function resolveMethodParameters(
+        \ReflectionMethod|\ReflectionFunction $method,
+        array                                 $givenArguments
+    ): array
+    {
+        return $this->argumentResolver->resolveMethodParameters($method, $givenArguments);
     }
 }
