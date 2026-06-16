@@ -8,7 +8,7 @@ use Medas\ObjectInstantiator\ParameterResolving;
 
 class CheckerWithVerboseTracing
 {
-    private const array FUNCTIONS_TO_SKIP = [
+    private const array METHODS_TO_SKIP = [
         'Medas\ObjectInstantiator\ObjectInstantiator' => [
             'instantiate',
             'getConstructorArgumentValues',
@@ -30,35 +30,17 @@ class CheckerWithVerboseTracing
     public function check(string $type): void
     {
         foreach (debug_backtrace() as $trace) {
-            if (isset($trace['class'])
-                    && in_array($trace['function'], self::FUNCTIONS_TO_SKIP[$trace['class']] ?? [], true)) {
+            if (!array_key_exists('class', $trace)) {
+                // Skip all global functions, closures, etc.
                 continue;
             }
 
-            if (!isset($trace['class']) && $trace['function'] === 'service') {
+            if (array_key_exists($trace['class'], self::METHODS_TO_SKIP)
+                    && in_array($trace['function'], self::METHODS_TO_SKIP[$trace['class']], true)) {
                 continue;
             }
 
-            if (isset($trace['class'])) {
-                if ($trace['class'] === ParameterResolving\ParameterResolveManager::class
-                        && $trace['function'] === 'resolveParameter') {
-                    /** @var \ReflectionParameter $parameter */
-                    $parameter = $trace['args'][0];
-
-                    $source = sprintf(
-                        "parameter $%s of method %s::%s()",
-                        $parameter->name,
-                        $parameter->getDeclaringClass()->name,
-                        $parameter->getDeclaringFunction()->name
-                    );
-                }
-                else {
-                    $source = 'body of ' . $trace['class'] . $trace['type'] . $trace['function'];
-                }
-            }
-            else {
-                $source = 'body of ' . $trace['function'];
-            }
+            $source = $this->compileSource($trace);
 
             foreach ($this->frames as $frame) {
                 if ($frame->type === $type && $frame->completed === false) {
@@ -70,6 +52,27 @@ class CheckerWithVerboseTracing
 
             return;
         }
+    }
+
+    private function compileSource(array $trace): string
+    {
+        if ($trace['class'] === ParameterResolving\ParameterResolveManager::class
+                && $trace['function'] === 'resolveParameter') {
+            /** @var \ReflectionParameter $parameter */
+            $parameter = $trace['args'][0];
+
+            $source = sprintf(
+                "parameter $%s of method %s::%s()",
+                $parameter->name,
+                $parameter->getDeclaringClass()->name,
+                $parameter->getDeclaringFunction()->name
+            );
+        }
+        else {
+            $source = 'body of ' . $trace['class'] . $trace['type'] . $trace['function'];
+        }
+
+        return $source;
     }
 
     public function markComplete(string $type): void
