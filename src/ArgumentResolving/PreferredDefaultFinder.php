@@ -7,6 +7,7 @@ namespace Medas\ObjectInstantiator\ArgumentResolving;
 use Medas\Core\{
     Attributes\PreferredDefault,
     Attributes\Service,
+    Exceptions\ServiceNotFoundByType,
     Interfaces\ParameterResolver,
     ParameterResolverResult
 };
@@ -27,6 +28,13 @@ class PreferredDefaultFinder implements ParameterResolver
             return new ParameterResolverResult(false);
         }
 
-        return new ParameterResolverResult(true, service($preferredDefault->className));
+        try {
+            $service = service($preferredDefault->className);
+        }
+        catch (ServiceNotFoundByType) {
+            return new ParameterResolverResult(false);
+        }
+
+        return new ParameterResolverResult(true, $service);
     }
 }
