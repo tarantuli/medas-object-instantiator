@@ -74,7 +74,7 @@ class ArgumentResolver
             $this->argumentProcessorNames
         );
 
-        uasort($this->argumentProcessors, fn($a, $b) => -$a->priority() <=> $b->priority());
+        uasort($this->argumentProcessors, fn($a, $b) => -($a->priority() <=> $b->priority()));
     }
 
     public function resolveParameter(\ReflectionParameter|\ReflectionProperty $parameter): mixed
@@ -113,6 +113,6 @@ class ArgumentResolver
             $this->parameterResolverNames
         );
 
-        uasort($this->parameterResolvers, fn($a, $b) => -$a->priority() <=> $b->priority());
+        uasort($this->parameterResolvers, fn($a, $b) => -($a->priority() <=> $b->priority()));
     }
 }
