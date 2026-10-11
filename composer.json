@@ -12,7 +12,7 @@
   ],
   "type": "library",
   "require": {
-    "morphp/medas-core": "^4",
+    "morphp/medas-core": "^4.4",
     "php": "^8.4"
   },
   "require-dev": {

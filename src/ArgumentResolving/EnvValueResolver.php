@@ -7,31 +7,36 @@ namespace Medas\ObjectInstantiator\ArgumentResolving;
 use Medas\Core\{
     Attributes\EnvValue,
     Attributes\Service,
-    Interfaces\ParameterResolver,
+    HandlesByCompiling,
+    Interfaces\CompilableParameterResolver,
     ParameterResolverResult
 };
 use Medas\ObjectInstantiator\Exceptions\EnvValueDoesNotExist;
 
 #[Service]
-class EnvValueResolver implements ParameterResolver
+class EnvValueResolver implements CompilableParameterResolver
 {
+    use HandlesByCompiling;
+
     public function priority(): int
     {
         return -180;
     }
 
-    public function handle(\ReflectionParameter|\ReflectionProperty $parameter): ParameterResolverResult
+    public function compile(\ReflectionParameter|\ReflectionProperty $parameter): EnvValue|null
     {
-        $envValue = attribute(EnvValue::class, $parameter);
+        return attribute(EnvValue::class, $parameter);
+    }
 
-        if (!$envValue) {
-            return new ParameterResolverResult(false);
+    /**
+     * @param EnvValue $compiled
+     */
+    public function resolveCompiled(object $compiled): ParameterResolverResult
+    {
+        if (!array_key_exists($compiled->name, $_ENV)) {
+            throw new EnvValueDoesNotExist($compiled->name);
         }
 
-        if (!array_key_exists($envValue->name, $_ENV)) {
-            throw new EnvValueDoesNotExist($envValue->name);
-        }
-
-        return new ParameterResolverResult(true, $_ENV[$envValue->name]);
+        return new ParameterResolverResult(true, $_ENV[$compiled->name]);
     }
 }

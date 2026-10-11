@@ -8,28 +8,33 @@ use Medas\Core\{
     Attributes\PreferredDefault,
     Attributes\Service,
     Exceptions\ServiceNotFoundByType,
-    Interfaces\ParameterResolver,
+    HandlesByCompiling,
+    Interfaces\CompilableParameterResolver,
     ParameterResolverResult
 };
 
 #[Service]
-class PreferredDefaultFinder implements ParameterResolver
+class PreferredDefaultFinder implements CompilableParameterResolver
 {
+    use HandlesByCompiling;
+
     public function priority(): int
     {
         return -190;
     }
 
-    public function handle(\ReflectionParameter|\ReflectionProperty $parameter): ParameterResolverResult
+    public function compile(\ReflectionParameter|\ReflectionProperty $parameter): PreferredDefault|null
     {
-        $preferredDefault = attribute(PreferredDefault::class, $parameter);
+        return attribute(PreferredDefault::class, $parameter);
+    }
 
-        if (!$preferredDefault) {
-            return new ParameterResolverResult(false);
-        }
-
+    /**
+     * @param PreferredDefault $compiled
+     */
+    public function resolveCompiled(object $compiled): ParameterResolverResult
+    {
         try {
-            $service = service($preferredDefault->className);
+            $service = service($compiled->className);
         }
         catch (ServiceNotFoundByType) {
             return new ParameterResolverResult(false);

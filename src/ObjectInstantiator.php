@@ -16,13 +16,15 @@ readonly class ObjectInstantiator implements ObjectInstantiatorInterface
     public function __construct(
         array $parameterResolverNames,
         array $argumentProcessorNames,
+        bool  $isDev = false,
     )
     {
         // This service is *not* instantiated automatically,
         // so don't add arguments and expect them to be injected.
         $this->argumentResolver = new ArgumentResolving\ArgumentResolver(
             $parameterResolverNames,
-            $argumentProcessorNames
+            $argumentProcessorNames,
+            $isDev,
         );
 
         $this->circularDependencyChecker = new CircularDependencies\Checker();
@@ -39,7 +41,10 @@ readonly class ObjectInstantiator implements ObjectInstantiatorInterface
         }
 
         try {
-            $arguments = $this->getConstructorArgumentValues($type, $givenArguments);
+            $arguments = $this->argumentResolver->resolveConstructorArguments(
+                $type,
+                $givenArguments
+            );
         }
 
         finally{
@@ -52,17 +57,6 @@ readonly class ObjectInstantiator implements ObjectInstantiatorInterface
         }
 
         return new $type(...$arguments);
-    }
-
-    private function getConstructorArgumentValues(string $className, array $givenArguments): array
-    {
-        $class = new \ReflectionClass($className);
-
-        if (!$constructor = $class->getConstructor()) {
-            return [];
-        }
-
-        return $this->argumentResolver->resolveMethodParameters($constructor, $givenArguments);
     }
 
     public function resetInstantiatingStack(): void
