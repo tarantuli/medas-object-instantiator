@@ -54,6 +54,14 @@ class ArgumentResolver
         );
     }
 
+    /**
+     * Whether the given class can be instantiated as a lazy object (see @class(Plans\PlanCompiler)).
+     */
+    public function canBeLazy(string $className): bool
+    {
+        return $this->planStore()->canBeLazy($className);
+    }
+
     public function resolveMethodParameters(
         \ReflectionMethod|\ReflectionFunction $method,
         array                                 $givenArguments

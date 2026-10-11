@@ -27,7 +27,7 @@ class PlanStore
     /**
      * Change this when the structure of the plans changes, so plans cached by an older version are discarded.
      */
-    private const string FORMAT_VERSION = '1';
+    private const string FORMAT_VERSION = '3';
     private const array CACHE_KEY = [self::class];
 
     /** @var array<string, MethodPlan> */
@@ -35,6 +35,15 @@ class PlanStore
 
     /** @var array<string, string>|null */
     private array|null $serializedPlans = null;
+
+    /**
+     * Per class, whether it can be instantiated as a lazy object. Kept apart from the plans, because deciding that a
+     * dependency may be injected lazily would otherwise mean unserializing the constructor plan of a class that may
+     * never be instantiated at all.
+     *
+     * @var array<string, bool>
+     */
+    private array $lazyFlags = [];
 
     private Cache|null $cache = null;
     private bool $isDirty = false;
@@ -83,10 +92,39 @@ class PlanStore
             $plan = $this->compiler->compile($className, $methodName);
             $this->serializedPlans[$key] = serialize($plan);
 
+            if ($methodName === '__construct') {
+                $this->lazyFlags[$className] = $plan->canBeLazy;
+            }
+
             $this->markDirty();
         }
 
         return $this->plans[$key] = $plan;
+    }
+
+    /**
+     * Whether the class can be instantiated as a lazy object, without unserializing its constructor plan.
+     */
+    public function canBeLazy(string $className): bool
+    {
+        if ($this->serializedPlans === null) {
+            $this->load();
+        }
+
+        // In development mode the plan must be checked for changes, which means getting it anyway
+        if (!$this->isDev && isset($this->lazyFlags[$className])) {
+            return $this->lazyFlags[$className];
+        }
+
+        $canBeLazy = $this->get($className, '__construct')->canBeLazy;
+
+        if (($this->lazyFlags[$className] ?? null) !== $canBeLazy) {
+            $this->lazyFlags[$className] = $canBeLazy;
+
+            $this->markDirty();
+        }
+
+        return $canBeLazy;
     }
 
     private function load(): void
@@ -98,6 +136,7 @@ class PlanStore
 
         if (is_array($stored) && ($stored['fingerprint'] ?? null) === $this->fingerprint) {
             $this->serializedPlans += $stored['plans'];
+            $this->lazyFlags += $stored['lazyFlags'];
         }
     }
 
@@ -127,6 +166,7 @@ class PlanStore
             $this->cache->set(self::CACHE_KEY, [
                 'fingerprint' => $this->fingerprint,
                 'plans' => $this->serializedPlans,
+                'lazyFlags' => $this->lazyFlags,
             ]);
         }
         catch (\Throwable $exception) {

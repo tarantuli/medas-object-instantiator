@@ -4,11 +4,12 @@ declare(strict_types=1);
 
 namespace Medas\ObjectInstantiator\ArgumentResolving\Plans;
 
-use Medas\Core\Interfaces\{
-    ArgumentProcessor,
-    CompilableArgumentProcessor,
-    CompilableParameterResolver,
-    ParameterResolver
+use Medas\Core\{
+    Attributes\Service,
+    Interfaces\ArgumentProcessor,
+    Interfaces\CompilableArgumentProcessor,
+    Interfaces\CompilableParameterResolver,
+    Interfaces\ParameterResolver
 };
 
 /**
@@ -53,7 +54,13 @@ readonly class PlanCompiler
             $method->getParameters()
         );
 
-        return new MethodPlan($className, $methodName, $parameters, $sourceFiles);
+        return new MethodPlan(
+            $className,
+            $methodName,
+            $parameters,
+            $sourceFiles,
+            $method->isConstructor() && $this->canBeLazy($class, $method),
+        );
     }
 
     private function addSourceFile(string|false $fileName, array &$sourceFiles): void
@@ -162,5 +169,28 @@ readonly class PlanCompiler
         }
 
         return $steps;
+    }
+
+    /**
+     * A lazy object only pays off when the constructor has dependencies to resolve, and PHP can't make objects lazy
+     * that extend internal classes, or call a constructor that isn't public from the outside.
+     */
+    private function canBeLazy(\ReflectionClass $class, \ReflectionMethod $constructor): bool
+    {
+        if ($class->isAbstract() || !$constructor->isPublic() || $constructor->getNumberOfParameters() === 0) {
+            return false;
+        }
+
+        if (attribute(Service::class, $class)?->lazy === false) {
+            return false;
+        }
+
+        for ($ancestor = $class; $ancestor !== false; $ancestor = $ancestor->getParentClass()) {
+            if ($ancestor->isInternal()) {
+                return false;
+            }
+        }
+
+        return true;
     }
 }

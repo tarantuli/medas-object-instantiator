@@ -10,6 +10,7 @@ use Medas\Core\{
     Exceptions\MultipleImplementorsFoundForParameter,
     HandlesByCompiling,
     Interfaces\CompilableParameterResolver,
+    Interfaces\ResolvesLazily,
     ParameterResolverResult
 };
 
@@ -73,6 +74,14 @@ readonly class ServiceFinderByType implements CompilableParameterResolver
             );
         }
 
-        return new ParameterResolverResult(true, sm()->resolve($compiled->value));
+        $serviceManager = sm();
+
+        // Dependencies are injected as lazy objects where possible, so services that are injected but never used
+        // (and their own dependencies) are never instantiated
+        $service = $serviceManager instanceof ResolvesLazily
+            ? $serviceManager->resolveLazy($compiled->value)
+            : $serviceManager->resolve($compiled->value);
+
+        return new ParameterResolverResult(true, $service);
     }
 }

@@ -4,10 +4,14 @@ declare(strict_types=1);
 
 namespace Medas\ObjectInstantiator;
 
-use Medas\Core\{Attributes\Service, Interfaces\ObjectInstantiator as ObjectInstantiatorInterface};
+use Medas\Core\{
+    Attributes\Service,
+    Interfaces\InstantiatesLazily,
+    Interfaces\ObjectInstantiator as ObjectInstantiatorInterface
+};
 
 #[Service]
-readonly class ObjectInstantiator implements ObjectInstantiatorInterface
+readonly class ObjectInstantiator implements ObjectInstantiatorInterface, InstantiatesLazily
 {
     private ArgumentResolving\ArgumentResolver $argumentResolver;
     private CircularDependencies\Checker $circularDependencyChecker;
@@ -33,6 +37,32 @@ readonly class ObjectInstantiator implements ObjectInstantiatorInterface
 
     public function instantiate(string $type, array $givenArguments = []): object
     {
+        return new $type(...$this->resolveConstructorArguments($type, $givenArguments));
+    }
+
+    /**
+     * Returns a lazy ghost: an uninitialized instance of the type, whose constructor arguments are resolved and whose
+     * constructor is called on first access to one of its properties. Calling a method that doesn't touch properties
+     * doesn't initialise it.
+     *
+     * Types that can't be lazy are instantiated directly.
+     */
+    public function instantiateLazy(string $type): object
+    {
+        if (!$this->argumentResolver->canBeLazy($type)) {
+            return $this->instantiate($type);
+        }
+
+        return new \ReflectionClass($type)->newLazyGhost($this->initializeGhost(...));
+    }
+
+    private function initializeGhost(object $ghost): void
+    {
+        $ghost->__construct(...$this->resolveConstructorArguments($ghost::class, []));
+    }
+
+    private function resolveConstructorArguments(string $type, array $givenArguments): array
+    {
         if (defined('TRACE_CIRCULAR_DEPENDENCIES')) {
             $this->verbodeCircularDependencyChecker->check($type);
         }
@@ -41,10 +71,7 @@ readonly class ObjectInstantiator implements ObjectInstantiatorInterface
         }
 
         try {
-            $arguments = $this->argumentResolver->resolveConstructorArguments(
-                $type,
-                $givenArguments
-            );
+            return $this->argumentResolver->resolveConstructorArguments($type, $givenArguments);
         }
 
         finally{
@@ -55,8 +82,6 @@ readonly class ObjectInstantiator implements ObjectInstantiatorInterface
                 $this->circularDependencyChecker->markComplete($type);
             }
         }
-
-        return new $type(...$arguments);
     }
 
     public function resetInstantiatingStack(): void

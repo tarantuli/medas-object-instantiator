@@ -14,12 +14,14 @@ readonly class MethodPlan
      * @param array<string, int> $sourceFiles The files the plan was compiled from, with their modification times, so
      *                                        development mode can detect that a plan is stale. Empty outside of
      *                                        development mode.
+     * @param bool $canBeLazy For constructors: whether the class can be instantiated as a lazy object
      */
     public function __construct(
         public string $className,
         public string $methodName,
         public array  $parameters,
         public array  $sourceFiles,
+        public bool   $canBeLazy = false,
     )
     {
     }
@@ -29,12 +31,24 @@ readonly class MethodPlan
      */
     public function __serialize(): array
     {
-        return [$this->className, $this->methodName, $this->parameters, $this->sourceFiles];
+        return [
+            $this->className,
+            $this->methodName,
+            $this->parameters,
+            $this->sourceFiles,
+            $this->canBeLazy
+        ];
     }
 
     public function __unserialize(array $data): void
     {
-        [$this->className, $this->methodName, $this->parameters, $this->sourceFiles] = $data;
+        [
+            $this->className,
+            $this->methodName,
+            $this->parameters,
+            $this->sourceFiles,
+            $this->canBeLazy
+        ] = $data;
     }
 
     public function isFresh(): bool

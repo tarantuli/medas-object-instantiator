@@ -11,16 +11,20 @@ class CheckerWithVerboseTracing
     private const array METHODS_TO_SKIP = [
         'Medas\ObjectInstantiator\ObjectInstantiator' => [
             'instantiate',
-            'getConstructorArgumentValues',
+            'instantiateLazy',
+            'initializeGhost',
+            'resolveConstructorArguments',
         ],
-        'Medas\ObjectInstantiator\ParameterResolving\ServiceFinderByType' => [
+        'Medas\ObjectInstantiator\ArgumentResolving\ServiceFinderByType' => [
             'handle',
+            'resolveCompiled',
         ],
         'Medas\ObjectInstantiator\CircularDependencies\CheckerWithVerboseTracing' => [
             'check',
         ],
         'Medas\ServiceManager\ServiceManager' => [
             'resolve',
+            'resolveLazy',
         ],
     ];
 
@@ -66,6 +70,21 @@ class CheckerWithVerboseTracing
                 $parameter->name,
                 $parameter->getDeclaringClass()->name,
                 $parameter->getDeclaringFunction()->name
+            );
+        }
+        elseif (
+            $trace['class'] === ArgumentResolving\ArgumentResolver::class
+            && $trace['function'] === 'resolvePlannedParameter'
+        ) {
+            /** @var ArgumentResolving\Plans\MethodPlan $plan */
+            /** @var ArgumentResolving\Plans\ParameterPlan $parameter */
+            [$plan, $parameter] = $trace['args'];
+
+            $source = sprintf(
+                "parameter $%s of method %s::%s()",
+                $parameter->name,
+                $plan->className,
+                $plan->methodName
             );
         }
         else {
