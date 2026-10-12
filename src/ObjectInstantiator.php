@@ -16,6 +16,7 @@ readonly class ObjectInstantiator implements ObjectInstantiatorInterface, Instan
     private ArgumentResolving\ArgumentResolver $argumentResolver;
     private CircularDependencies\Checker $circularDependencyChecker;
     private CircularDependencies\CheckerWithVerboseTracing $verbodeCircularDependencyChecker;
+    private Tracing\InstantiationTrace|null $trace;
 
     public function __construct(
         array $parameterResolverNames,
@@ -33,11 +34,20 @@ readonly class ObjectInstantiator implements ObjectInstantiatorInterface, Instan
 
         $this->circularDependencyChecker = new CircularDependencies\Checker();
         $this->verbodeCircularDependencyChecker = new CircularDependencies\CheckerWithVerboseTracing();
+
+        // Development aid: define TRACE_INSTANTIATIONS as a file path, before the service
+        // manager is built, to log every service instantiated (see InstantiationTrace)
+        /** @noinspection PhpUndefinedConstantInspection */
+        $this->trace = defined('TRACE_INSTANTIATIONS')
+            ? new Tracing\InstantiationTrace(TRACE_INSTANTIATIONS)
+            : null;
     }
 
     public function instantiate(string $type, array $givenArguments = []): object
     {
-        return new $type(...$this->resolveConstructorArguments($type, $givenArguments));
+        $this->trace?->created($type);
+
+        return $this->construct($type, $givenArguments);
     }
 
     /**
@@ -50,14 +60,25 @@ readonly class ObjectInstantiator implements ObjectInstantiatorInterface, Instan
     public function instantiateLazy(string $type): object
     {
         if (!$this->argumentResolver->canBeLazy($type)) {
-            return $this->instantiate($type);
+            $this->trace?->createdAlthoughAskedLazily($type);
+
+            return $this->construct($type, []);
         }
+
+        $this->trace?->createdLazily($type);
 
         return new \ReflectionClass($type)->newLazyGhost($this->initializeGhost(...));
     }
 
+    private function construct(string $type, array $givenArguments): object
+    {
+        return new $type(...$this->resolveConstructorArguments($type, $givenArguments));
+    }
+
     private function initializeGhost(object $ghost): void
     {
+        $this->trace?->initialized($ghost::class);
+
         $ghost->__construct(...$this->resolveConstructorArguments($ghost::class, []));
     }
 
@@ -70,11 +91,15 @@ readonly class ObjectInstantiator implements ObjectInstantiatorInterface, Instan
             $this->circularDependencyChecker->check($type);
         }
 
+        $this->trace?->startConstructing($type);
+
         try {
             return $this->argumentResolver->resolveConstructorArguments($type, $givenArguments);
         }
 
         finally{
+            $this->trace?->endConstructing();
+
             if (defined('TRACE_CIRCULAR_DEPENDENCIES')) {
                 $this->verbodeCircularDependencyChecker->markComplete($type);
             }

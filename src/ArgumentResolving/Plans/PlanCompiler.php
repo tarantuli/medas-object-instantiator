@@ -9,6 +9,7 @@ use Medas\Core\{
     Interfaces\ArgumentProcessor,
     Interfaces\CompilableArgumentProcessor,
     Interfaces\CompilableParameterResolver,
+    Interfaces\DependsOnSourceFiles,
     Interfaces\ParameterResolver
 };
 
@@ -49,10 +50,11 @@ readonly class PlanCompiler
         // The method can be declared in a parent class or a trait, which lives in another file
         $this->addSourceFile($method->getFileName(), $sourceFiles);
 
-        $parameters = array_map(
-            fn(\ReflectionParameter $parameter): ParameterPlan => $this->compileParameter($parameter),
-            $method->getParameters()
-        );
+        $parameters = [];
+
+        foreach ($method->getParameters() as $parameter) {
+            $parameters[] = $this->compileParameter($parameter, $sourceFiles);
+        }
 
         return new MethodPlan(
             $className,
@@ -63,25 +65,27 @@ readonly class PlanCompiler
         );
     }
 
-    private function addSourceFile(string|false $fileName, array &$sourceFiles): void
-    {
-        // Internal classes have no file, eval()'d classes have no real one
-        if (!$this->isDev || $fileName === false || isset($sourceFiles[$fileName]) || !is_file($fileName)) {
-            return;
-        }
-
-        $sourceFiles[$fileName] = filemtime($fileName);
-    }
-
-    private function compileParameter(\ReflectionParameter $parameter): ParameterPlan
+    private function compileParameter(\ReflectionParameter $parameter, array &$sourceFiles): ParameterPlan
     {
         [$fallback, $defaultValue] = $this->determineFallback($parameter);
+        $resolverSteps = $this->compileResolverSteps($parameter);
+        $processorSteps = $this->compileProcessorSteps($parameter);
+
+        // A compiled step can depend on other classes (a config option's name and default, for
+        // instance), and the plan is stale when one of those changes too
+        foreach ([...$resolverSteps, ...$processorSteps] as [, $compiled]) {
+            if ($compiled instanceof DependsOnSourceFiles) {
+                foreach ($compiled->sourceFiles() as $fileName) {
+                    $this->addSourceFile($fileName, $sourceFiles);
+                }
+            }
+        }
 
         return new ParameterPlan(
             $parameter->name,
             $parameter->getPosition(),
-            $this->compileResolverSteps($parameter),
-            $this->compileProcessorSteps($parameter),
+            $resolverSteps,
+            $processorSteps,
             $fallback,
             $defaultValue,
         );
@@ -169,6 +173,16 @@ readonly class PlanCompiler
         }
 
         return $steps;
+    }
+
+    private function addSourceFile(string|false $fileName, array &$sourceFiles): void
+    {
+        // Internal classes have no file, eval()'d classes have no real one
+        if (!$this->isDev || $fileName === false || isset($sourceFiles[$fileName]) || !is_file($fileName)) {
+            return;
+        }
+
+        $sourceFiles[$fileName] = filemtime($fileName);
     }
 
     /**
