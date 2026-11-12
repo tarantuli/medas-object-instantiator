@@ -16,6 +16,14 @@ use Medas\Core\{
 /**
  * Analyses the parameters of a method once, so they can be resolved without reflection from then on. This is where
  * all attribute reading of parameter resolvers and argument processors happens.
+ *
+ * For each parameter, it asks every compilable resolver and processor to `compile()` it, keeping the steps that
+ * apply. Resolvers and processors that aren't compilable always get a step. It also decides the fallback for when no
+ * resolver handles the parameter, and, for constructors, whether the class can be lazy.
+ *
+ * @performance Uses reflection and calls `compile()` on every resolver and processor for every parameter. That
+ *              happens once per method, as long as the plan stays cached.
+ * @see PlanStore
  */
 readonly class PlanCompiler
 {
@@ -32,6 +40,12 @@ readonly class PlanCompiler
     {
     }
 
+    /**
+     * Returns the plan for `$className::$methodName()`. A class without a constructor gets a plan without parameters
+     * when `$methodName` is `'__construct'`.
+     *
+     * @throws \ReflectionException When the class or method doesn't exist.
+     */
     public function compile(string $className, string $methodName): MethodPlan
     {
         $class = new \ReflectionClass($className);

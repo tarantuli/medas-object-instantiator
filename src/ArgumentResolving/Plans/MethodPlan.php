@@ -6,6 +6,10 @@ namespace Medas\ObjectInstantiator\ArgumentResolving\Plans;
 
 /**
  * The pre-analysed resolution of all parameters of a method, so resolving its arguments needs no reflection.
+ *
+ * A method without parameters, or a class without a constructor, gets a plan without parameters.
+ *
+ * @see PlanCompiler
  */
 readonly class MethodPlan
 {
@@ -51,6 +55,12 @@ readonly class MethodPlan
         ] = $data;
     }
 
+    /**
+     * Whether none of the source files changed since the plan was compiled. Always true outside of development mode,
+     * where no source files are recorded.
+     *
+     * @performance Checks the modification time of every source file.
+     */
     public function isFresh(): bool
     {
         // is_file() fills PHP's stat cache, so filemtime() does not hit the file system again

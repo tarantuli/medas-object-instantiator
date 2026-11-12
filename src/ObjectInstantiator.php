@@ -38,7 +38,7 @@ use Medas\Core\{
  *        One instance serves the whole process.
  * @notFor Getting a service: `instantiate()` creates a new object on every call. Use `service()` for the shared
  *         instance.
- * @see \Medas\Core\Interfaces\ObjectInstantiator
+ * @see ObjectInstantiatorInterface
  */
 #[Service]
 readonly class ObjectInstantiator implements ObjectInstantiatorInterface, InstantiatesLazily

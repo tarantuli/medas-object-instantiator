@@ -6,6 +6,19 @@ namespace Medas\ObjectInstantiator\CircularDependencies;
 
 use Medas\ObjectInstantiator\ArgumentResolving;
 
+/**
+ * Detects circular dependencies like @class(Medas\ObjectInstantiator\CircularDependencies\Checker), but also
+ * remembers where each class was requested, so the exception describes the whole cycle. `ObjectInstantiator` uses it
+ * instead of `Checker` when `TRACE_CIRCULAR_DEPENDENCIES` is defined.
+ *
+ * Where a class was requested is the first frame in the call stack that isn't part of the instantiation itself: the
+ * parameter that needed it, or else the method that asked for it. When there's no such frame, it's `(top level)`.
+ *
+ * @assumes `METHODS_TO_SKIP` lists every method of the object instantiator and the service manager that sits between
+ *          `check()` and the code that asked for the type. A method that's missing is reported as the source.
+ * @state Keeps a frame for each class being instantiated, so one instance must be used for the whole process.
+ * @performance `check()` takes a backtrace, with arguments, on every instantiation, so it's meant for debugging only.
+ */
 class CheckerWithVerboseTracing
 {
     /*
@@ -30,6 +43,7 @@ class CheckerWithVerboseTracing
         ],
         'Medas\ObjectInstantiator\CircularDependencies\CheckerWithVerboseTracing' => [
             'check',
+            'findSource',
         ],
         'Medas\ServiceManager\ServiceManager' => [
             'resolve',
@@ -41,7 +55,25 @@ class CheckerWithVerboseTracing
     /** @var VerboseFrame[] */
     private array $frames = [];
 
+    /**
+     * Records that `$type` is being instantiated, and where it was requested.
+     *
+     * @throws TracedCircularDependencyFound When `$type` is already being instantiated further up the call stack.
+     */
     public function check(string $type): void
+    {
+        $source = $this->findSource();
+
+        foreach ($this->frames as $frame) {
+            if ($frame->type === $type) {
+                throw new TracedCircularDependencyFound($this->frames, $type, $source);
+            }
+        }
+
+        $this->frames[] = new VerboseFrame($type, $source);
+    }
+
+    private function findSource(): string
     {
         foreach (debug_backtrace() as $trace) {
             if (!array_key_exists('class', $trace)) {
@@ -54,18 +86,11 @@ class CheckerWithVerboseTracing
                 continue;
             }
 
-            $source = $this->compileSource($trace);
-
-            foreach ($this->frames as $frame) {
-                if ($frame->type === $type) {
-                    throw new TracedCircularDependencyFound($this->frames, $type, $source);
-                }
-            }
-
-            $this->frames[] = new VerboseFrame($type, $source);
-
-            return;
+            return $this->compileSource($trace);
         }
+
+        // Only functions and skipped methods are on the call stack, like when a script calls service()
+        return '(top level)';
     }
 
     private function compileSource(array $trace): string
@@ -121,6 +146,9 @@ class CheckerWithVerboseTracing
         return $source;
     }
 
+    /**
+     * Forgets the frame of `$type`, whether instantiating it succeeded or not.
+     */
     public function markComplete(string $type): void
     {
         // A type has at most one frame, because a second check() for it throws

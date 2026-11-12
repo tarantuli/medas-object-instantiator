@@ -21,6 +21,10 @@ enum Fallback: int
      * be defined at runtime) or contains objects (`new` in initialisers), which must be a fresh instance every time.
      */
     case DefaultValueFromReflection = 2;
+
+    /**
+     * Use `null`. Only for parameters without a default value that allow `null`.
+     */
     case null = 3;
 
     /**

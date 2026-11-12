@@ -13,14 +13,22 @@ use Medas\Core\Interfaces\{Cache, CacheManager};
  * separately, so a request only pays for unserializing the plans it actually uses.
  *
  * Plans are compiled lazily rather than all at once when the service configuration is built, so a problem in a
- * service that is never used (e.g. an ambiguous dependency) only surfaces when it is used, as before. Newly compiled
- * plans are written back once, at the end of the request. Two concurrent requests that both compile plans can
- * overwrite each other's additions; the missing plans are simply compiled again on a later request.
+ * service that is never used (e.g. an ambiguous dependency) only surfaces when it is used, as before.
  *
- * The plans depend on the registered resolvers and processors and on the service mapping. They share their life
- * cycle with the cached service configuration (both live in the default cache), and the fingerprint discards them
- * when the resolvers or processors change. In development mode, each plan is checked against the modification times
- * of its source files the first time it is used in a request.
+ * @assumes The `CacheManager` service can be resolved when the first plan is needed.
+ * @sideEffect The first plan that's needed reads the cache entry from the `'default'` cache.
+ * @sideEffect Compiling a plan registers a shutdown function, once, that writes all plans back to that entry. Two
+ *             concurrent requests that both compile plans can overwrite each other's additions; the missing plans
+ *             are simply compiled again on a later request.
+ * @state Keeps the plans it has used for the lifetime of the process. In a long-running worker, new plans are only
+ *        written when the worker stops, unless `save()` is called.
+ * @cache The plans depend on the registered resolvers and processors and on the service mapping. They share their life
+ *        cycle with the cached service configuration (both live in the `'default'` cache), and the fingerprint
+ *        discards them when the resolvers or processors change. In development mode, each plan is checked against
+ *        the modification times of its source files the first time it is used in the process. A change to what a
+ *        resolver or processor compiles isn't detected that way, so it needs the cache to be cleared, or a new
+ *        `FORMAT_VERSION`.
+ * @see PlanCompiler
  */
 class PlanStore
 {
@@ -66,6 +74,11 @@ class PlanStore
         ) . "\0" . implode(',', $argumentProcessorNames));
     }
 
+    /**
+     * Returns the plan for `$className::$methodName()`, from memory, from the cache, or compiled on the spot.
+     *
+     * @throws \ReflectionException When the plan has to be compiled, and the class or method doesn't exist.
+     */
     public function get(string $className, string $methodName): MethodPlan
     {
         $key = $className . '::' . $methodName;
@@ -82,7 +95,8 @@ class PlanStore
             ? unserialize($this->serializedPlans[$key])
             : null;
 
-        // Anything else means the plan was corrupted, or refers to a class that no longer exists
+        // Anything else means the cache entry is corrupted. A plan that refers to a class that no longer exists still
+        // unserialises, so changes like that need the cache to be cleared (see the class docblock)
         if (!$plan instanceof MethodPlan) {
             $plan = null;
         }
@@ -152,7 +166,8 @@ class PlanStore
     }
 
     /**
-     * Writes the plans to the cache. Called automatically at the end of the request when plans were compiled.
+     * Writes the plans to the cache, if any were compiled since they were last written. Called automatically at the
+     * end of the request when plans were compiled. A failure is logged with `error_log()` rather than thrown.
      */
     public function save(): void
     {

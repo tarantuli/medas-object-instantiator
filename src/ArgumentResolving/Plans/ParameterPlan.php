@@ -8,10 +8,13 @@ namespace Medas\ObjectInstantiator\ArgumentResolving\Plans;
  * The pre-analysed resolution of a single parameter.
  *
  * A step is a tuple of the index of a resolver (or processor) in the priority-ordered list of resolvers (or
- * processors), and the object its ```compile()``` returned for this parameter. Resolvers and processors that returned
- * null from ```compile()``` are left out, because they never apply to this parameter. A step with null as its compiled
- * object belongs to a resolver or processor that is not compilable, which is called the classic way, with a
+ * processors), and the object its `compile()` returned for this parameter. Resolvers and processors that returned
+ * `null` from `compile()` are left out, because they never apply to this parameter. A step with `null` as its
+ * compiled object belongs to a resolver or processor that is not compilable, which is called the classic way, with a
  * reflection object.
+ *
+ * @assumes The indexes match the order of the resolvers and processors the plan was compiled with. `PlanStore`
+ *          discards plans when the registered resolvers or processors change.
  */
 readonly class ParameterPlan
 {
@@ -25,6 +28,8 @@ readonly class ParameterPlan
         public array    $resolverSteps,
         public array    $processorSteps,
         public Fallback $fallback,
+
+        /** Only used with `Fallback::DefaultValue`. */
         public mixed    $defaultValue = null,
     )
     {

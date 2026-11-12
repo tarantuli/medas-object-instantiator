@@ -4,12 +4,21 @@ declare(strict_types=1);
 
 namespace Medas\ObjectInstantiator\Tracing;
 
-// Records, for one request or command, every service the object instantiator creates:
-// directly, as a lazy ghost, or a ghost that got initialised. Each line says who asked
-// for it (the service whose constructor needed it, or else the first caller outside the
-// instantiator and service manager), or for an initialised ghost, who first used it.
-// Written to the file when the process ends, appended, so several requests can be
-// compared. Switched on by defining TRACE_INSTANTIATIONS as that file's path.
+/**
+ * Records, for one request or command, every service the object instantiator creates: directly, as a lazy ghost, or a
+ * ghost that got initialised. Each line says who asked for it (the service whose constructor needed it, or else the
+ * first caller outside the instantiator and service manager), or for an initialised ghost, who first used it.
+ *
+ * Switched on by defining `TRACE_INSTANTIATIONS` as the path of the file to write to, before the service manager is
+ * built. The file starts with a summary line per request, followed by a tab-separated line per event.
+ *
+ * @sideEffect The constructor registers a shutdown function that appends the record to the file, with an exclusive
+ *             lock, so several requests can be compared.
+ * @state Keeps every event in memory until the process ends, so in a long-running worker the record keeps growing and
+ *        is only written when the worker stops.
+ * @performance Initialising a ghost takes a short backtrace, and so does any other event that isn't requested by a
+ *              constructor.
+ */
 class InstantiationTrace
 {
     private const array FRAMEWORK_CLASS_PREFIXES = [
@@ -60,17 +69,26 @@ class InstantiationTrace
         );
     }
 
+    /**
+     * `$type` was instantiated directly.
+     */
     public function created(string $type): void
     {
         $this->events[] = ['created', $type, $this->requester()];
     }
 
-    // Asked for lazily, but its class can't be lazy (see ArgumentResolver::canBeLazy())
+    /**
+     * `$type` was asked for lazily, but its class can't be lazy, so it was instantiated directly (see
+     * `ArgumentResolver::canBeLazy()`).
+     */
     public function createdAlthoughAskedLazily(string $type): void
     {
         $this->events[] = ['created, not lazy', $type, $this->requester()];
     }
 
+    /**
+     * A lazy ghost of `$type` was created.
+     */
     public function createdLazily(string $type): void
     {
         $this->events[] = ['lazy', $type, $this->requester()];
@@ -105,7 +123,12 @@ class InstantiationTrace
         );
     }
 
-    // Called from the ghost's initialiser: the frame above it is where the ghost was touched
+    /**
+     * A lazy ghost of `$type` was initialised.
+     *
+     * @assumes It's called directly from the ghost's initialiser, so the frame above that one is where the ghost was
+     *          first used.
+     */
     public function initialized(string $type): void
     {
         $frames = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 3);
@@ -123,6 +146,10 @@ class InstantiationTrace
             : $frame['function'];
     }
 
+    /**
+     * The constructor arguments of `$type` are being resolved, so services created from now on are requested by it.
+     * Must be followed by `endConstructing()`.
+     */
     public function startConstructing(string $type): void
     {
         $this->constructing[] = $type;
