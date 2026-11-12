@@ -5,9 +5,8 @@ declare(strict_types=1);
 namespace Medas\ObjectInstantiatorTest\Functional;
 
 use Medas\Core\Exceptions\CouldNotResolveParameter;
-use Medas\ObjectInstantiator\{ObjectInstantiator};
 use Medas\ObjectInstantiatorTest\BaseTestClass;
-use Medas\ObjectInstantiatorTest\MockUps\Instantiation\{ClassWithArgument,Logger};
+use Medas\ObjectInstantiatorTest\MockUps\Instantiation\{ClassWithArgument, Logger};
 
 class InstantiationTest extends BaseTestClass
 {
@@ -20,7 +19,6 @@ class InstantiationTest extends BaseTestClass
 
     public function testNonServiceArgumentFail(): void
     {
-        $this->loadMockUps();
         $this->expectException(CouldNotResolveParameter::class);
 
         medas()->objectInstantiator()->instantiate(ClassWithArgument::class);
@@ -28,10 +26,6 @@ class InstantiationTest extends BaseTestClass
 
     public function testPassArgumentSuccess(): void
     {
-        $this->loadMockUps();
-
-        service(ObjectInstantiator::class)->resetInstantiatingStack();
-
         $object = medas()->objectInstantiator()->instantiate(
             ClassWithArgument::class,
             ['number' => 10]

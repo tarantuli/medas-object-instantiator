@@ -6,7 +6,8 @@ namespace Medas\ObjectInstantiatorTest\MockUps\CircularDependencies;
 
 use Medas\Core\Attributes\Service;
 
-#[Service]
+// Not lazy, because a lazy dependency would break the cycle that this mock-up is meant to cause
+#[Service(lazy: false)]
 class IndirectDependency2
 {
     public function __construct(

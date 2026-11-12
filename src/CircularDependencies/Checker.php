@@ -8,7 +8,7 @@ use Medas\Core\Exceptions\CircularDependencyFound;
 
 class Checker
 {
-    /** @var string[] */
+    /** @var array<string, true> */
     private array $instantiating = [];
 
     public function check(string $type): void
@@ -23,10 +23,5 @@ class Checker
     public function markComplete(string $type): void
     {
         unset($this->instantiating[$type]);
-    }
-
-    public function reset(): void
-    {
-        $this->instantiating = [];
     }
 }

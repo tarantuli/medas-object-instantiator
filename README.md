@@ -87,7 +87,7 @@ readonly class ApiClient
 }
 ```
 
-`EnvValueDoesNotExist` is thrown at instantiation time if the key is absent from `$_ENV`. Load your `.env` file via `medas-config-manager` before the DI container is built.
+`EnvValueDoesNotExist` is thrown when the constructor arguments are resolved and the key is absent from `$_ENV`, even when the parameter has a default value or allows `null`. For a service that is injected as a lazy object, that happens when the service is first used, not when it is injected. Load your `.env` file via `medas-config-manager` before the DI container is built.
 
 **Overriding type-based resolution with `#[PreferredDefault]`:**
 
@@ -105,6 +105,8 @@ readonly class ReportGenerator
     ) {}
 }
 ```
+
+The preferred service is injected the same way as one found by type, so it is a lazy object too. When no service provides the class in the attribute, the parameter is resolved by type as usual.
 
 **Writing a custom `ParameterResolver`:**
 
@@ -177,7 +179,7 @@ With this constant defined, `TracedCircularDependencyFound` is thrown instead of
 
 ### Lazy services
 
-`ServiceFinderByType` injects services through `ServiceManager::resolveLazy()`, which registers a lazy object as the service when it hasn't been instantiated yet; later calls to `resolve()` return that same object. Calling a method that doesn't touch any property doesn't initialize it.
+`ServiceFinderByType` and `PreferredDefaultFinder` inject services through `ServiceManager::resolveLazy()`, which registers a lazy object as the service when it hasn't been instantiated yet; later calls to `resolve()` return that same object. Calling a method that doesn't touch any property doesn't initialize it.
 
 A class is only made lazy when that pays off and PHP allows it: it must have a public constructor with at least one parameter, must not be abstract and must not extend an internal PHP class (such as `ArrayObject` or `Exception`). Other classes are instantiated directly.
 

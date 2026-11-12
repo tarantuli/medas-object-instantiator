@@ -6,13 +6,17 @@ namespace Medas\ObjectInstantiatorTest\Functional;
 
 use Medas\Core\Exceptions\CircularDependencyFound;
 use Medas\ObjectInstantiatorTest\BaseTestClass;
-use Medas\ObjectInstantiatorTest\MockUps\CircularDependencies\{DirectDependency1,IndirectDependency1,SelfDependency};
+use Medas\ObjectInstantiatorTest\MockUps\CircularDependencies\{
+    DirectDependency1,
+    IndirectDependency1,
+    SelfDependency
+};
 
 class CircularDependenciesTest extends BaseTestClass
 {
     public function testSelfDependency(): void
     {
-        $manager = $this->loadMockUps();
+        $manager = $this->serviceManager();
 
         self::expectException(CircularDependencyFound::class);
 
@@ -21,7 +25,7 @@ class CircularDependenciesTest extends BaseTestClass
 
     public function testDirectDependency(): void
     {
-        $manager = $this->loadMockUps();
+        $manager = $this->serviceManager();
 
         self::expectException(CircularDependencyFound::class);
 
@@ -30,7 +34,7 @@ class CircularDependenciesTest extends BaseTestClass
 
     public function testIndirectDependency(): void
     {
-        $manager = $this->loadMockUps();
+        $manager = $this->serviceManager();
 
         self::expectException(CircularDependencyFound::class);
 

@@ -8,14 +8,23 @@ use Medas\ObjectInstantiator\ArgumentResolving;
 
 class CheckerWithVerboseTracing
 {
+    /*
+     * Every method between check() and the code that asked for the type must be listed here, otherwise that method is
+     * reported as the source instead.
+     */
     private const array METHODS_TO_SKIP = [
         'Medas\ObjectInstantiator\ObjectInstantiator' => [
             'instantiate',
             'instantiateLazy',
+            'construct',
             'initializeGhost',
             'resolveConstructorArguments',
         ],
         'Medas\ObjectInstantiator\ArgumentResolving\ServiceFinderByType' => [
+            'handle',
+            'resolveCompiled',
+        ],
+        'Medas\ObjectInstantiator\ArgumentResolving\PreferredDefaultFinder' => [
             'handle',
             'resolveCompiled',
         ],
@@ -25,6 +34,7 @@ class CheckerWithVerboseTracing
         'Medas\ServiceManager\ServiceManager' => [
             'resolve',
             'resolveLazy',
+            'resolveUnresolved',
         ],
     ];
 
@@ -47,7 +57,7 @@ class CheckerWithVerboseTracing
             $source = $this->compileSource($trace);
 
             foreach ($this->frames as $frame) {
-                if ($frame->type === $type && $frame->completed === false) {
+                if ($frame->type === $type) {
                     throw new TracedCircularDependencyFound($this->frames, $type, $source);
                 }
             }
@@ -62,15 +72,32 @@ class CheckerWithVerboseTracing
     {
         if ($trace['class'] === ArgumentResolving\ArgumentResolver::class
                 && $trace['function'] === 'resolveParameter') {
-            /** @var \ReflectionParameter $parameter */
+            /** @var \ReflectionParameter|\ReflectionProperty $parameter */
             $parameter = $trace['args'][0];
 
-            $source = sprintf(
-                "parameter $%s of method %s::%s()",
-                $parameter->name,
-                $parameter->getDeclaringClass()->name,
-                $parameter->getDeclaringFunction()->name
-            );
+            // Properties have no declaring function, and parameters of closures and functions have no declaring class
+            if ($parameter instanceof \ReflectionProperty) {
+                $source = sprintf(
+                    "property $%s of class %s",
+                    $parameter->name,
+                    $parameter->getDeclaringClass()->name
+                );
+            }
+            elseif ($parameter->getDeclaringClass() === null) {
+                $source = sprintf(
+                    "parameter $%s of function %s()",
+                    $parameter->name,
+                    $parameter->getDeclaringFunction()->name
+                );
+            }
+            else {
+                $source = sprintf(
+                    "parameter $%s of method %s::%s()",
+                    $parameter->name,
+                    $parameter->getDeclaringClass()->name,
+                    $parameter->getDeclaringFunction()->name
+                );
+            }
         }
         elseif (
             $trace['class'] === ArgumentResolving\ArgumentResolver::class
@@ -96,15 +123,7 @@ class CheckerWithVerboseTracing
 
     public function markComplete(string $type): void
     {
-        foreach ($this->frames as $value) {
-            if ($value->type === $type) {
-                $value->completed = true;
-            }
-        }
-    }
-
-    public function reset(): void
-    {
-        $this->frames = [];
+        // A type has at most one frame, because a second check() for it throws
+        $this->frames = array_values(array_filter($this->frames, fn(VerboseFrame $frame) => $frame->type !== $type));
     }
 }

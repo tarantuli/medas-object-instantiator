@@ -14,10 +14,6 @@ class TracedCircularDependencyFound extends BaseException implements DeclaresMax
         $history = '';
 
         foreach ($frames as $frame) {
-            if ($frame->completed) {
-                continue;
-            }
-
             $history .= sprintf("   -  %s   from %s\n", $frame->type, $frame->source);
         }
 

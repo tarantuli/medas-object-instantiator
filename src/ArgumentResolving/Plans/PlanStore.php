@@ -27,7 +27,7 @@ class PlanStore
     /**
      * Change this when the structure of the plans changes, so plans cached by an older version are discarded.
      */
-    private const string FORMAT_VERSION = '3';
+    private const string FORMAT_VERSION = '4';
     private const array CACHE_KEY = [self::class];
 
     /** @var array<string, MethodPlan> */
