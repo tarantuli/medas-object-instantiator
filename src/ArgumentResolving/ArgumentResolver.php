@@ -31,7 +31,7 @@ use Medas\Core\{
  *        long-running worker doesn't pick up changed classes.
  * @performance Closures, functions and properties have no stable identity to cache a plan for, so they are resolved
  *              by asking every resolver and processor, with reflection and attribute reading, on every call.
- * @see \Medas\ObjectInstantiator\ArgumentResolving\Plans\PlanStore
+ * @see Plans\PlanStore
  */
 #[Service]
 class ArgumentResolver

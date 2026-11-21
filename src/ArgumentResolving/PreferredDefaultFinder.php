@@ -29,7 +29,7 @@ use Medas\Core\{
  *             new instance.
  * @cache The cached plan keeps the attribute, and only when a service provides its class. Changes to the service
  *        mapping only take effect once the cache is cleared.
- * @see \Medas\Core\Attributes\PreferredDefault
+ * @see PreferredDefault
  */
 class PreferredDefaultFinder implements CompilableParameterResolver
 {

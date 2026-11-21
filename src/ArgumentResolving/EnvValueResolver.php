@@ -20,7 +20,7 @@ use Medas\ObjectInstantiator\Exceptions\EnvValueDoesNotExist;
  * @assumes The variable is in `$_ENV` when the argument is resolved. PHP only fills `$_ENV` when `variables_order`
  *          contains `E`; otherwise something else, like a `.env` loader, has to fill it.
  * @cache Only the variable's name is kept in the cached plan. The value is read from `$_ENV` on every resolution.
- * @see \Medas\Core\Attributes\EnvValue
+ * @see EnvValue
  */
 class EnvValueResolver implements CompilableParameterResolver
 {

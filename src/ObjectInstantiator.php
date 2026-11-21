@@ -152,8 +152,7 @@ readonly class ObjectInstantiator implements ObjectInstantiatorInterface, Instan
         try {
             return $this->argumentResolver->resolveConstructorArguments($type, $givenArguments);
         }
-
-        finally{
+        finally {
             $this->trace?->endConstructing();
 
             if (defined('TRACE_CIRCULAR_DEPENDENCIES')) {
